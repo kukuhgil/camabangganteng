@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zahra's Photobooth</title>
+
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@300;500&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+</head>
+
+<body>
+
+    <section id="boothScreen" class="screen active">
+
+        <div class="tab-bar center-bottom">
+            <button class="tab-btn" data-modal="modal-shot">
+                <i data-feather="clock"></i><span>Shot</span>
+            </button>
+        </div>
+
+        <div class="booth-wrap">
+            <div class="booth landscape">
+                <div id="countdown"></div>
+                <div id="flash"></div>
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+                <button id="shutterBtn"></button>
+            </div>
+        </div>
+
+        <div class="preview-area">
+            <span
+                style="font-size: 10px; color: #666; display: flex; position: fixed; justify-content: flex-end;margin: 10px;">Klik
+                foto untuk retake foto/tombol X untuk Hapus Foto</span>
+
+            <div id="previewStrip" class="preview-strip">
+            </div>
+        </div>
+
+        <div class="button-one">
+            <button id="process" disabled>Proses Hasil Foto</button>
+        </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+        <div class="result-container">
+            <div class="result-left">
+                <h2>Your Photobooth Result</h2>
+                <canvas id="collage"></canvas>
+            </div>
+
+            <div class="result-right">
+                <h3>Customization</h3>
+
+                <div class="editor-step active" id="step1">
+                    <div class="editor-group">
+                        <label>1. Filter & Frame Color</label>
+                        <select id="filterEditor" onchange="updateLiveSettings()">
+                            <option value="normal">Normal</option>
+                            <option value="bw">B&W</option>
+                            <option value="vintage">Vintage</option>
+                            <option value="soft">Soft</option>
+                            <option value="country">Country</option>
+                            <option value="dv">Digital Video</option>
+                            <option value="instax">Instax</option>
+                        </select>
+                        <label>Warna Frame</label>
+                        <input type="color" id="frameColorEditor" value="#ffffff" oninput="updateLiveSettings()">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="useStoreColor" onchange="updateLiveSettings()">
+                            Warna Border Frame
+                        </label>
+                        <input type="color" id="storeColorEditor" oninput="updateLiveSettings()"
+                            style="display: none;">
+
+                        <label>Upload Background</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="file" id="bgUploadEditor" accept="image/*" onchange="updateLiveSettings()">
+                            <button id="removeUploadBtn" class="delete-btn-bg"
+                                onclick="removeSpecificBg('upload')">×</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="editor-step" id="step2">
+                    <div class="editor-group">
+                        <label>2. Text & Emoji</label>
+                        <input type="text" id="textPrimaryEditor" placeholder="Main Title"
+                            oninput="updateLiveSettings()">
+                        <input type="text" id="textSecondaryEditor" placeholder="Sub Title"
+                            oninput="updateLiveSettings()">
+                        <select id="emojiSelectEditor" onchange="updateLiveSettings()">
+                            <option value="">No Emoji</option>
+                            <option value="❤️">❤️ Love</option>
+                            <option value="✨">✨ Sparkle</option>
+                            <option value="📸">📸 Camera</option>
+                            <option value="🌸">🌸 Flower</option>
+                        </select>
+                    </div>
+                    <div class="editor-group">
+                        <label>Date Display</label>
+                        <select id="dateModeEditor" onchange="updateLiveSettings()">
+                            <option value="auto">Auto Date</option>
+                            <option value="custom">Custom Date</option>
+                            <option value="off">Off</option>
+                        </select>
+                        <input type="date" id="customDateEditor" style="display:none" oninput="updateLiveSettings()">
+                    </div>
+                </div>
+
+                <div class="editor-step" id="step3">
+                    <div class="editor-group">
+                        <label>3. Texture Gallery</label>
+                        <div id="textureGallery" class="texture-gallery"></div>
+                        <button id="removeTextureBtn" class="delete-btn-bg" onclick="removeSpecificBg('texture')"
+                            style="margin-top:10px; width: 100%;">Remove Texture</button>
+                    </div>
+                    <div class="editor-group">
+                        <label>Frame Template (coming soon) </label>
+                        <select id="frameTemplateEditor" onchange="updateLiveSettings()">
+                            <option value="">-</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="step-navigation">
+                    <button id="prevStep" class="nav-btn" style="visibility: hidden;">Previous</button>
+                    <button id="nextStep" class="nav-btn">Next</button>
+                </div>
+            </div>
+
+            <div class="button-two footer-actions" id="finalActions">
+                <button id="download">Download Image</button>
+                <button id="reset">Take Again</button>
+            </div>
+    </section>
+
+    <!-- ================= MODALS ================= -->
+
+    <div id="modal-shot" class="modal">
+        <div class="modal-content">
+            <label>Timer</label>
+            <select id="timer">
+                <option value="3">3s</option>
+                <option value="5">5s</option>
+                <option value="10">10s</option>
+            </select>
+
+            <label>Jumlah Foto</label>
+            <select id="count">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="6">6</option>
+            </select>
+
+            <button id="saveShot">Simpan</button>
+        </div>
+    </div>
+
+    <div id="modal-style" class="modal">
+        <div class="modal-content">
+            <label>Filter</label>
+            <select id="filter">
+                <option value="normal">Normal</option>
+                <option value="bw">B&W</option>
+                <option value="vintage">Vintage</option>
+                <option value="soft">Soft</option>
+                <option value="country">Country</option>
+                <option value="dv">DV Cam</option>
+                <option value="instax">Instax</option>
+            </select>
+            <span>============================</span>
+            <span style="font-size: 10px; color: red;">*Pilih salah satu</span>
+            <label>Custom Template Frame</label>
+            <select id="frameTemplate">
+                <option value="">-</option>
+                <option value="6-kz.png">Template Birthday (6 Foto)</option>
+            </select>
+            <label>Warna Frame</label>
+            <input type="color" id="frameColor" value="#ffffff">
+
+            <label>Atau Custom Background (Image)</label>
+            <input type="file" id="bgUpload" accept="image/*">
+            <p style="font-size: 10px; color: #666;">*Kosongkan jika ingin menggunakan warna/template di atas</p>
+
+            <button id="saveStyle">Simpan</button>
+        </div>
+    </div>
+
+    <div id="modal-text" class="modal">
+        <div class="modal-content">
+            <label>Teks Utama</label>
+            <input id="textPrimary">
+
+            <label>Teks Kedua</label>
+            <input id="textSecondary">
+
+            <label>Emoji</label>
+            <select id="emojiSelect">
+                <option value="">-</option>
+                <option>✨</option>
+                <option>❤️</option>
+                <option>🌸</option>
+            </select>
+
+            <label>Tanggal</label>
+            <select id="dateMode">
+                <option value="auto">Otomatis</option>
+                <option value="custom">Custom</option>
+                <option value="without">-</option>
+            </select>
+
+            <input type="date" id="customDateEditor" style="display:none" oninput="updateLiveSettings()"
+                onkeydown="return false">
+            <button id="saveText">Simpan</button>
+        </div>
+    </div>
+
+    <script>feather.replace()</script>
+    <script src="js/js.js"></script>
+</body>
+
+</html>
