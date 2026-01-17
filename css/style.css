@@ -6,11 +6,13 @@
     --accent: #a9b388;
     --dark: #5f6b5d;
     --text: #432818;
+    --bg-gradient: radial-gradient(circle at top left, var(--blue), #d6ccc2);
+    --card-bg: rgba(255, 255, 255, 0.5);
 }
 
 * {
     box-sizing: border-box;
-    font-family: 'Jost', sans-serif;
+    font-family: 'Jost', 'Fraunces', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
 html,
@@ -22,8 +24,16 @@ body {
     overflow: hidden;
 }
 
+body.dark-theme {
+    --blue: #1a1a1a;
+    --text: #e8e2d6;
+    --dark: #a9b388;
+    --bg-gradient: radial-gradient(circle at top left, #2c3e50, #000000);
+    --card-bg: rgba(0, 0, 0, 0.6);
+}
+
 body {
-    background: radial-gradient(circle at top left, var(--blue), #d6ccc2);
+    background: var(--bg-gradient);
     color: var(--text);
 }
 
@@ -79,10 +89,529 @@ body {
 
 /* ===== START SCREEN ===== */
 #startScreen {
+    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
+    min-height: 100vh;
+    padding: 40px;
+}
+
+#tutorialScreen {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-gradient);
+    text-align: center;
+}
+
+
+/* Container Utama Tutorial */
+.tutorial-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1100px;
+    min-height: 80vh;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Grid System untuk 5 Kotak */
+.tutorial-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    width: 100%;
+    margin-bottom: 50px;
+}
+
+/* Styling Tiap Kotak */
+.tutorial-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: transform 0.3s ease;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.tutorial-navigation {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    margin-top: auto;
+    padding-top: 40px;
+}
+
+/* Modifikasi untuk Setup Screen (Kiri & Kanan) */
+.tutorial-navigation.between {
+    justify-content: space-between;
+}
+
+.pre-btn {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.next-btn {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.next-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(1);
+}
+
+#setupScreen {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-gradient);
+    text-align: center;
+}
+
+/* Memastikan Wrapper Setup bisa mendorong navbar ke bawah */
+.setup-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1100px;
+    min-height: 80vh;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.start-btn {
+    padding: 12px 40px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+/* Tempat Gambar Tutorial */
+.card-img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: #f0f0f0;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--text);
+    overflow: hidden;
+}
+
+.card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tutorial-wrapper h2 {
+    font-size: 3rem;
+    font-weight: 900;
+    line-height: 1.4;
+}
+
+.tutorial-card p {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+}
+
+/*slider switch*/
+/* From Uiverse.io by andrew-demchenk0 */
+.theme-switch {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+.mode-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--main-color);
+    text-transform: uppercase;
+    align-items: center;
+    transform: scale(0.75);
+}
+
+.switch {
+    --input-focus: #2d8cf0;
+    --font-color: #323232;
+    --font-color-sub: #666;
+    --bg-color: #fff;
+    --bg-color-alt: #666;
+    --main-color: #323232;
+    position: relative;
+    display: inline-block;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+    width: 40px;
+    height: 15px;
+    margin: 8px;
+
+}
+
+.toggle {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    box-sizing: border-box;
+    border-radius: 5px;
+    border: 2px solid var(--main-color);
+    box-shadow: 4px 4px var(--main-color);
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--bg-colorcolor);
+    transition: 0.3s;
+}
+
+.slider:before {
+    box-sizing: border-box;
+    position: absolute;
+    content: "";
+    height: 12px;
+    width: 12px;
+    border: 2px solid var(--main-color);
+    border-radius: 5px;
+    left: 0px;
+    bottom: 2px;
+    background-color: var(--bg-color);
+    box-shadow: 0 3px 0 var(--main-color);
+    transition: 0.3s;
+}
+
+.toggle:checked+.slider {
+    background-color: var(--input-focus);
+}
+
+.toggle:checked+.slider:before {
+    transform: translateX(30px);
+}
+
+#darkModeToggle:not(:checked)~.mode-text:first-of-type {
+    color: var(--input-focus);
+}
+
+#darkModeToggle:checked~.mode-text:last-of-type {
+    color: var(--input-focus);
+}
+
+/* Responsif: Jika layar kecil (HP), jadi 2 atau 3 kolom saja */
+@media (max-width: 900px) {
+    .tutorial-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .tutorial-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/*setupscreen*/
+.setup-content-split {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    /* Kiri agak sempit, Kanan lebih lebar */
+    gap: 40px;
+    width: 100%;
+}
+
+.setup-column {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.section-label {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--main-color);
+    opacity: 0.6;
+    margin-bottom: 10px;
+}
+
+/* Timer: Susun Vertikal */
+.timer-vertical-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.timer-vertical-grid .selection-card {
+    flex-direction: row;
+    /* Icon dan teks sejajar horizontal */
+    justify-content: flex-start;
+    padding: 15px 25px;
+    gap: 20px;
+}
+
+.card-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.card-info .desc {
+    font-size: 11px;
+    opacity: 0.5;
+}
+
+/* Frame: Susun Grid 3 Kolom */
+.frame-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.selection-card {
+    background: var(--card-bg);
+    border: 2px solid #eee;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.selection-card.active {
+    border-color: var(--accent);
+    background: rgba(var(--accent-rgb), 0.05);
+    transform: scale(1.02);
+}
+
+/* Preview Strip Simpel */
+.strip-mini {
+    width: 30px;
+    min-height: 20px;
+    background: var(--blue);
+    padding: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    border-radius: 2px;
+    border: 1px solid var(--dark);
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+}
+
+.grid-area {
+    display: grid;
+    gap: 3px;
+    width: 100%;
+}
+
+.p1 span {
+    aspect-ratio: 4/3;
+}
+
+.p2 {
+    grid-template-columns: 1fr;
+}
+
+.p2 span {
+    aspect-ratio: 4/3;
+}
+
+.p3 {
+    grid-template-columns: 1fr;
+}
+
+.p3 span {
+    aspect-ratio: 4/3;
+}
+
+.p4 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.p4 span {
+    aspect-ratio: 1/1;
+}
+
+.p6 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.p6 span {
+    aspect-ratio: 1/1;
+}
+
+.grid-area span {
+    background: var(--text);
+    /* Di dark mode berubah jadi --dark (hijau) */
+    border: 0.5px solid rgba(0, 0, 0, 0.1);
+    display: block;
+    width: 100%;
+}
+
+.blackbox {
+    width: 100%;
+    height: 12px;
+    background: #00000000;
+    /* Blackbox biasanya tetap hitam */
+    margin-top: auto;
+    border-radius: 1px;
+}
+
+/* Tambahan agar di Dark Mode grid lebih tegas */
+body.dark-theme .grid-area span {
+    background: white;
+    border: 0.5px solid rgba(255, 255, 255, 0.2);
+}
+
+#btnStartBooth,
+.start-btn,
+.pre-btn,
+.next-btn,
+.next-btn-booth,
+.pre-btn-booth {
+    padding: 12px 40px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    /* Mengikuti style editor step Anda */
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+#btnStartBooth:hover,
+.start-btn:hover,
+.pre-btn:hover,
+.next-btn:hover,
+.pre-btn-booth:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.next-btn-booth:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Responsif: Di layar kecil, tombol bisa di tengah jika diinginkan */
+@media (max-width: 600px) {
+    .tutorial-navigation {
+        justify-content: center;
+    }
+}
+
+.setup-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1100px;
+    min-height: 80vh;
+    ;
+    /* Memberi ruang agar navigasi di bawah */
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.setup-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.setup-header h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    font-weight: bolder;
+}
+
+.setup-content {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    align-items: center;
+}
+
+.setup-field {
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.setup-field label {
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.setup-select {
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid var(--accent);
+    font-size: 16px;
+    background: white;
+}
+
+/* Navigasi Kiri & Kanan Bawah */
+.setup-navigation {
+    display: flex;
+    justify-content: space-between;
+    /* Memisah ke kiri dan kanan */
+    width: 100%;
+    margin-top: auto;
+    /* Mendorong container ke dasar wrapper */
+    padding-top: 40px;
+}
+
+/* Class tombol kamu tetap sama */
+.start-btn {
+    padding: 12px 40px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s ease;
 }
 
 #startScreen h1 {
@@ -92,6 +621,23 @@ body {
     color: var(--text);
     letter-spacing: -1px;
     margin-bottom: 0;
+}
+
+.version {
+    margin-top: 10px;
+    margin-bottom: 40px;
+    font-size: 1rem;
+    color: var(--dark);
+    font-weight: 600;
+}
+
+.credit {
+    justify-content: flex-end;
+    align-items: flex-end;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    color: var(--dark);
+    font-weight: 900;
 }
 
 .subtitle {
@@ -125,12 +671,15 @@ body {
 
 /* ===== BOOTH SCREEN (LANDSCAPE) ===== */
 #boothScreen {
-    display: none;
-    grid-template-columns: 1fr 800px;
-    gap: 20px;
-    padding: 60px 60px 0 60px;
-    max-height: 100vh;
-    overflow: hidden;
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    background: var(--bg-gradient);
+    text-align: center;
+    gap: 40px;
+    padding: 40px;
+    flex-direction: column;
+    justify-content: center;
+    background: var(--bg-gradient);
 }
 
 #boothScreen.active {
@@ -141,7 +690,7 @@ body {
 .booth {
     position: relative;
     width: 820px;
-    height: 565px;
+    height: 525px;
     border-radius: 24px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
     overflow: hidden;
@@ -262,28 +811,42 @@ canvas {
 
 /* ===== RESULT SCREEN ===== */
 #resultScreen {
+    padding: 0;
+    background: var(--bg-gradient);
+    height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
+    overflow: hidden;
 }
 
-#resultScreen h2 {
-    font-family: 'Fraunces', serif;
+.result-header {
     color: var(--text);
-    font-size: 2rem;
+    text-align: center;
 }
 
-.result-tools {
-    position: relative;
-    /* Bukan fixed lagi */
-    bottom: 0;
-    margin-top: 20px;
-    background: white;
-    /* Beri kontras agar terlihat di atas background app */
-    transform: none;
-    left: 0;
+.result-header h2 {
+    font-size: 2rem;
+    font-family: 'Fraunces';
+}
+
+.result-left p {
+    font-size: 1rem;
+    text-align: center;
+}
+
+.result-left .wm-text {
+    font-size: 1rem;
+    text-align: center;
+    font-weight: bolder;
+}
+
+.result-container {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    height: calc(100vh - 80px);
+    gap: 0;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .editor-tools {
@@ -299,16 +862,46 @@ canvas {
 }
 
 #collage {
+    max-height: 80vh;
     width: auto;
-    max-height: 70vh;
-    object-fit: cover;
-    padding: 30px;
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
-    transform: rotate(-1deg);
-
+    max-width: 50%;
 }
 
+.support-text {
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px dashed rgba(0, 0, 0, 0.1);
+    text-align: center;
+    font-size: 13px;
+    color: var(--text);
+    opacity: 0.8;
+}
 
+.support-text span {
+    font-weight: 400;
+}
+
+.support-text a {
+    color: #d4a373;
+    /* Warna senada dengan aksen kamu */
+    text-decoration: none;
+    font-weight: 700;
+    margin-left: 5px;
+    transition: all 0.3s ease;
+}
+
+.support-text a:hover {
+    color: var(--dark);
+    text-decoration: underline;
+}
+
+/* Responsif: Jika di layar kecil, sembunyikan atau pindahkan */
+@media (max-width: 600px) {
+    .support-text {
+        font-size: 11px;
+        margin-top: 15px;
+    }
+}
 
 #shutterBtn {
     position: absolute;
@@ -340,7 +933,7 @@ canvas {
 }
 
 .preview-strip {
-    width: 500px;
+    width: auto;
     border-radius: 12px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -453,6 +1046,31 @@ canvas {
     font-weight: bold;
 }
 
+.footer-note {
+    margin-top: 30px;
+    text-align: center;
+    width: 100%;
+}
+
+.buy-coffee-text {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.coffee-btn {
+    /* Jika Anda tetap pakai tag <button>, kita buat dia transparan */
+    background: none !important;
+    color: var(--text) !important;
+    border: none !important;
+    text-decoration: underline;
+    font-size: 0.8rem !important;
+    opacity: 0.6;
+}
+
 /* Modal System */
 .modal {
     display: none;
@@ -499,13 +1117,43 @@ canvas {
 }
 
 
-.button-one {
+.booth-navigation {
+    display: flex;
     justify-content: flex-end;
-    align-items: flex-end;
+    /* Memindah tombol ke kanan */
+    align-items: center;
     width: 100%;
-    gap: 15px;
-    min-height: 50px;
+    margin-top: auto;
+    /* Mendorong container ini ke paling bawah */
+    padding-top: 40px;
 }
+
+/* Modifikasi untuk Setup Screen (Kiri & Kanan) */
+.booth-navigation.between {
+    justify-content: space-around;
+    gap: 282px;
+    position: fixed;
+    bottom: 90px;
+    left: 0;
+    right: 0;
+    /* Tombol 1 ke Kiri, Tombol 2 ke Kanan */
+}
+
+.pre-btn-booth {
+    display: flex;
+    justify-content: flex-start;
+    /* Default: Pojok Kanan */
+    align-items: center;
+}
+
+.next-btn-both {
+    display: flex;
+    justify-content: flex-end;
+    /* Default: Pojok Kanan */
+    align-items: center;
+}
+
+/* State ketika tombol belum bisa diklik (foto belum lengkap) */
 
 .button-two {
     display: flex;
@@ -581,34 +1229,34 @@ button:disabled {
 }
 
 /* Layout Hasil: Kiri Foto, Kanan Settings */
-.result-container {
-    display: grid;
-    grid-template-columns: 0.8fr 0.8fr;
-    /* Proporsi kiri lebih besar */
-    width: 100%;
-    max-width: 1200px;
-    gap: 20px;
-    margin-top: 20px;
-    padding: 30px 0 0 0;
-}
-
 .result-left {
+    max-width: 1200px;
+    min-height: 600px;
+    flex: 1.2;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    padding: 0px;
+    transition: transform 0.6s ease, opacity 0.6s ease, filter 0.6s ease;
 }
 
 .result-right {
-    background: rgba(255, 255, 255, 0.5);
-    justify-content: center;
-    padding: 30px;
-    border-radius: 15px;
-    backdrop-filter: blur(10px);
+    flex: 0.8;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 40px;
     display: flex;
     flex-direction: column;
-    gap: 15px;
-    text-align: left;
-    height: fit-content;
+    z-index: 10;
+}
+
+.result-right h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    margin-bottom: 30px;
 }
 
 .editor-group {
@@ -670,31 +1318,58 @@ button:disabled {
 
 .texture-gallery {
     display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-top: 10px;
-    padding: 5px;
+    flex-direction: row;
+    /* Berjejer ke samping */
+    gap: 15px;
+    overflow-x: auto;
+    /* Slide horizontal */
+    padding: 15px 5px;
+    width: 100%;
+    scrollbar-width: thin;
+    /* Untuk Firefox */
+    scrollbar-color: var(--accent) transparent;
 }
 
 /* Thumbnail Bulat */
-.texture-item {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: 2px solid transparent;
-    background-size: cover;
-    background-position: center;
-    transition: all 0.2s ease;
+.texture-gallery::-webkit-scrollbar {
+    height: 6px;
 }
 
-.texture-item:hover {
-    transform: scale(1.1);
+.texture-gallery::-webkit-scrollbar-thumb {
+    background: var(--accent);
+    border-radius: 10px;
+}
+
+.texture-item {
+    flex: 0 0 50px;
+    /* Ukuran tetap agar tidak gepeng saat di-slide */
+    height: 50px;
+    border-radius: 50px;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.footer-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 10px 0;
 }
 
 .texture-item.active {
     border-color: var(--accent);
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05);
+}
+
+@media (max-width: 1024px) {
+    .result-container.editor-active .result-left {
+        transform: scale(0.8) translateX(-100px);
+        /* Geser & kecilkan saat edit */
+        opacity: 0.3;
+        /* Menutup sedikit agar fokus ke kanan */
+        pointer-events: none;
+    }
 }
 
 /* Tombol Hapus Background */
@@ -738,13 +1413,12 @@ button:disabled {
 .result-container {
     display: grid;
     grid-template-columns: 1fr 400px;
-    /* Lebar panel editor tetap 400px agar rapi */
     width: 100%;
-    max-width: 1200px;
-    gap: 1px;
+    max-width: 100vh;
+    gap: 12px;
     margin: 0 auto;
-    padding: 50px 50px 0 0;
-    align-items: start;
+    align-items: center;
+    justify-content: center;
 }
 
 .result-right {
@@ -763,14 +1437,12 @@ button:disabled {
 
 /* ================= MULTI-STEP EDITOR (SLIDES) ================= */
 
-/* Sembunyikan semua step secara default */
 .editor-step {
     display: none;
     flex-direction: column;
     gap: 20px;
 }
 
-/* Tampilkan step yang aktif dengan animasi slide */
 .editor-step.active {
     display: flex;
     animation: slideIn 0.4s ease-out forwards;
@@ -788,7 +1460,6 @@ button:disabled {
     }
 }
 
-/* Label & Input Styling */
 .editor-group label {
     font-weight: 600;
     font-size: 0.85rem;
@@ -802,11 +1473,11 @@ button:disabled {
 
 .step-navigation {
     margin-top: auto;
+    /* Mendorong tombol ke bawah box */
     display: flex;
     justify-content: space-between;
-    align-items: center;
     padding-top: 20px;
-    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 /* Tombol Next & Previous di kanan bawah */
@@ -891,175 +1562,89 @@ button:disabled {
 /*MEDIAAAAAAAAAAAAA QUErYYYYYYYYYYYYY*/
 
 /* ============================================================
-   MEDIA QUERIES UNTUK SKALA LAPTOP & IPAD
-   (Tambahkan di bagian paling bawah file CSS Anda)
+   FIX KHUSUS BOOTH SCREEN (Anti-Terpotong & Responsif)
    ============================================================ */
 
-/* 1. Skala untuk Laptop (Layar sedang/kecil) */
-/* ============================================================
-   MEDIA QUERIES UNTUK SKALA LAPTOP & IPAD
-   ============================================================ */
-
-/* 1. Skala untuk Laptop (Layar sedang/kecil) */
-@media (max-width: 1366px) {
+/* 1. LAPTOP DI BAWAH 14 INCH (1025px - 1359px) */
+@media (max-width: 1359px) and (min-width: 1025px) {
     #boothScreen {
-        grid-template-columns: 1fr 350px;
-        padding: 30px;
-    }
-
-    .booth {
-        width: 100%;
-        max-width: 700px;
-        height: auto;
-        aspect-ratio: 820 / 565;
-    }
-
-    .result-container {
-        grid-template-columns: 1fr 380px;
-        padding: 30px;
-    }
-
-    /* Penyesuaian class span-tek di laptop */
-    .span-tek {
-        margin: 10px;
-        font-size: 9px;
-    }
-}
-
-/* 2. Skala untuk iPad & Tablet (Portrait/Landscape) */
-@media (max-width: 1024px) {
-
-    html,
-    body {
-        max-height: none;
-    }
-
-    .app {
-        height: auto;
-        min-height: 100vh;
-    }
-
-    #boothScreen {
-        justify-items: left;
-        grid-template-columns: 1fr;
-        overflow-y: hidden;
-    }
-
-    .button-one {
-        display: flex;
-        position: relative;
-        justify-items: center;
-        align-items: center;
-    }
-
-    .result-container {
-        grid-template-columns: 1.1fr 1.1fr;
-        justify-items: center;
-        gap: 20px;
-        padding: 50px;
-    }
-
-    .booth {
-        max-width: 100%;
-        height: 500px;
-    }
-
-    .preview-strip {
-        max-width: 100%;
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .result-right {
-        width: 100%;
-        max-width: 500px;
-        margin-top: 50%;
-        justify-content: center;
-    }
-
-    #collage {
-        max-width: 90%;
-        transform: none;
-    }
-
-    .span-tek {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-end;
-        width: 100%;
-    }
-}
-@media (max-width: 768px) {
-
-    html,
-    body {
-        max-height: none;
-    }
-
-    .app {
-        height: auto;
-        min-height: 100vh;
-    }
-
-    #boothScreen {
-        justify-items: left;
-        grid-template-columns: 1fr;
-        overflow-y: hidden;
-    }
-
-    .button-one {
-        display: flex;
-        position: relative;
-        justify-items: center;
-        align-items: center;
-    }
-
-    .result-container {
-        grid-template-columns: 1.1fr 1.1r;
-        justify-items: center;
-        gap: 12px;
-        padding: 50px;
-    }
-
-    .booth {
-        max-width: 100%;
-        height: 400px;
-    }
-
-    .preview-strip {
-        max-width: 100%;
-        grid-template-columns: repeat(3, 1fr);
-    }
-
-    .result-right {
+        display: grid;
+        grid-template-columns: 1fr 300px; /* Perkecil area preview */
+        gap: 30px;
         padding: 20px;
-        width: 100%;
-        max-width: 320px;
-        margin-top: 30%;
-        justify-content: center;
+        height: 100vh;
+        box-sizing: border-box;
     }
 
-    #collage {
-        max-width: 85%;
-        transform: none;
+    .booth {
+        width: 100%;
+        height: auto;
+        max-height: 550px; /* Kunci tinggi agar tidak menabrak bottom layar */
+        border-width: 6px;
     }
 
-    .span-tek {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        justify-content: flex-end;
-        width: 100%;
+    .preview-strip {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+        align-items: center;
+        max-height: 80vh;
+        overflow-y: auto;
+    }
+
+    .preview-strip img {
+        width: 100%; /* Fluid di dalam grid preview */
+        height: auto;
     }
 }
 
-/* 3. Penyesuaian khusus tinggi layar pendek */
-@media (max-height: 700px) {
-    .booth {
-        max-width: 600px;
+/* 2. IPAD & TABLET (768px - 1024px) */
+@media (max-width: 1024px) {
+    #boothScreen {
+        display: flex;
+        flex-direction: column; /* Tumpuk ke bawah agar kamera tetap lebar */
+        justify-content: flex-start;
+        align-items: center;
+        padding: 15px;
+        height: 100vh;
+        overflow-y: auto; /* Izinkan scroll jika preview banyak */
     }
 
-    #startScreen h1 {
-        font-size: 3rem;
+    .booth {
+        width: 100vw;
+        max-width: 650px;
+        height: auto;
+        margin-bottom: 20px;
+        flex-shrink: 0; /* Mencegah kamera mengecil jadi gepeng */
+    }
+
+    .preview-strip {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* 3 kolom di iPad */
+        gap: 15px;
+        width: 100%;
+        max-width: 750px;
+        padding-bottom: 40px; /* Ruang agar tidak tertutup tombol navigasi */
+    }
+
+    /* Logic Teks Preview (iPad): Di atas foto, tidak menimpa */
+    .preview-strip div {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .preview-strip span {
+        position: static;
+        background: none;
+        color: var(--text);
+        font-weight: 700;
+        font-size: 12px;
+        padding: 0;
+    }
+
+    .preview-strip img {
+        width: 100%;
+        height: 100%;
+        border-radius: 8px;
     }
 }

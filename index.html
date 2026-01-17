@@ -1,22 +1,379 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zahra's Photobooth</title>
-    <link rel="stylesheet" href="css/style.css" />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@300;500&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@300;500&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
 </head>
 
 <body>
-    <div class="app">
-        <section id="startScreen" class="screen active">
-            <h1>Zahra's Photobooth</h1>
-            <p class="subtitle">Capture your sweetest moments</p>
-            <a href="main.html"><button id="goBooth">Start Photobooth</button></a>
-        </section>
-        <script src="js/js.js"></script>
+    <div class="theme-switch">
+        <span class="mode-text">Light</span>
+        <label class="switch">
+            <input class="toggle" type="checkbox" id="darkModeToggle">
+            <span class="slider"></span>
+            <span class="card-side"></span>
+        </label>
+        <span class="mode-text">Dark</span>
+    </div>
+
+    <section id="startScreen" class="screen active">
+        <h1>Zahra's Photobooth</h1>
+        <p class="subtitle">Pure moments, captured.</p>
+        <button class="start-btn" onclick="showScreen('tutorialScreen')">START</button>
+        <p class="version">Beta V 0.2</p>
+        <p class="credit">Created by Kukuh G</p>
+    </section>
+
+    <section id="tutorialScreen" class="screen">
+        <div class="tutorial-wrapper">
+            <h2>TUTORIAL</h2>
+
+            <div class="tutorial-grid">
+                <div class="tutorial-card">
+                    <div class="card-img">1</div>
+                    <p>Pilih durasi & jumlah foto kamu</p>
+                </div>
+                <div class="tutorial-card">
+                    <div class="card-img">2</div>
+                    <p>Teken Tombol bulet putih untuk foto</p>
+                </div>
+                <div class="tutorial-card">
+                    <div class="card-img">3</div>
+                    <p>Cek foto jika dirasa udah pas tekan next lagi</p>
+                </div>
+                <div class="tutorial-card">
+                    <div class="card-img">4</div>
+                    <p>Edit Foto sesukamu, ada beberapa fitur yang bisa kamu coba </p>
+                </div>
+                <div class="tutorial-card">
+                    <div class="card-img">5</div>
+                    <p>Tekan Download dan selamat mencoba yaaa❤️</p>
+                </div>
+            </div>
+
+            <div class="tutorial-navigation">
+                <button id="btnStartBooth" class="nav-btn" onclick="showScreen('setupScreen')">NEXT</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="setupScreen" class="screen" style="display:none;">
+        <div class="setup-wrapper">
+            <header class="setup-header">
+                <h2>CAPTURE CAMERA SETTING</h2>
+            </header>
+
+            <div class="setup-content-split">
+                <div class="setup-column">
+                    <label class="section-label">PILIH DURASI</label>
+                    <div class="timer-vertical-grid">
+                        <div class="selection-card" onclick="updateSelection('timer', 3, this)">
+                            <i data-feather="clock"></i>
+                            <div class="card-info">
+                                <span class="title">3 Detik</span>
+                                <span class="desc">Kamu mau kemana? buru-buru banget</span>
+                            </div>
+                        </div>
+                        <div class="selection-card" onclick="updateSelection('timer', 5, this)">
+                            <i data-feather="clock"></i>
+                            <div class="card-info">
+                                <span class="title">5 Detik</span>
+                                <span class="desc">Normal si masih aman</span>
+                            </div>
+                        </div>
+                        <div class="selection-card" onclick="updateSelection('timer', 10, this)">
+                            <i data-feather="clock"></i>
+                            <div class="card-info">
+                                <span class="title">10 Detik</span>
+                                <span class="desc">bisa santai sambil mikirin pose</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setup-column">
+                    <label class="section-label">PILIH FRAME</label>
+                    <div class="frame-grid">
+                        <div class="selection-card" onclick="updateSelection('count', 1, this)">
+                            <div class="strip-mini">
+                                <div class="grid-area p1"><span></span></div>
+                                <div class="blackbox"></div>
+                            </div>
+                            <span>1 Photo</span>
+                        </div>
+
+                        <div class="selection-card" onclick="updateSelection('count', 2, this)">
+                            <div class="strip-mini">
+                                <div class="grid-area p2"><span></span><span></span></div>
+                                <div class="blackbox"></div>
+                            </div>
+                            <span>2 Photos</span>
+                        </div>
+
+                        <div class="selection-card" onclick="updateSelection('count', 3, this)">
+                            <div class="strip-mini">
+                                <div class="grid-area p3"><span></span><span></span><span></span></div>
+                                <div class="blackbox"></div>
+                            </div>
+                            <span>3 Photos</span>
+                        </div>
+
+                        <div class="selection-card" onclick="updateSelection('count', 4, this)">
+                            <div class="strip-mini">
+                                <div class="grid-area p4">
+                                    <span></span><span></span>
+                                    <span></span><span></span>
+                                </div>
+                                <div class="blackbox"></div>
+                            </div>
+                            <span>4 Photos</span>
+                        </div>
+
+                        <div class="selection-card" onclick="updateSelection('count', 6, this)">
+                            <div class="strip-mini">
+                                <div class="grid-area p6">
+                                    <span></span><span></span>
+                                    <span></span><span></span>
+                                    <span></span><span></span>
+                                </div>
+                                <div class="blackbox"></div>
+                            </div>
+                            <span>6 Photos</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tutorial-navigation between">
+                <button class="pre-btn" onclick="showScreen('tutorialScreen')">PREVIOUS</button>
+                <button class="next-btn" onclick="confirmSetup()">NEXT</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="boothScreen" class="screen active">
+        <div class="booth-wrap">
+            <div class="booth landscape">
+                <div id="countdown"></div>
+                <div id="flash"></div>
+                <video id="video" autoplay playsinline></video>
+                <canvas id="canvas"></canvas>
+                <button id="shutterBtn"></button>
+                <button id="mirrorBtn" title="Mirror Camera">⟲</button>
+            </div>
+
+            <div class="preview-area">
+                <span class="span-tek ">Klik foto untuk retake foto/tombol X untuk Hapus Foto
+                </span>
+                <div id="previewStrip" class="preview-strip">
+                </div>
+            </div>
+        </div>
+        <div class="booth-navigation between">
+            <button id="prevToTutorial" class="pre-btn-booth" onclick="showScreen('setupScreen')">
+                PREVIOUS
+            </button>
+
+            <button id="process" class="next-btn-booth" disabled>
+                NEXT
+            </button>
+        </div>
+    </section>
+
+    <section id="resultScreen" class="screen">
+        <div class="result-container">
+            <div class="result-left">
+                <div class="result-header">
+                    <h2>Here's Result</h2>
+                </div> <canvas id="collage"></canvas>
+                <p>Thanks udah nyoba foto di <br> <span class="wm-text">Zahrafoto</span> <br>tungguin update berikutnya
+                    yaww!!</p>
+            </div>
+
+            <div class="result-right">
+                <h3>Customization</h3>
+                <div class="editor-step active" id="step1">
+                    <div class="editor-group">
+                        <label>Filter</label>
+                        <select id="filterEditor" onchange="updateLiveSettings()">
+                            <option value="normal">Normal</option>
+                            <option value="bw">B&W</option>
+                            <option value="vintage">Vintage</option>
+                            <option value="soft">Soft</option>
+                            <option value="country">Country</option>
+                            <option value="dv">Digital Video</option>
+                            <option value="instax">Instax</option>
+                        </select>
+                        <label>Warna Frame</label>
+                        <input type="color" id="frameColorEditor" value="#ffffff" oninput="updateLiveSettings()">
+                        <label style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="useStoreColor" onchange="updateLiveSettings()">
+                            Warna Border Frame
+                        </label>
+                        <input type="color" id="storeColorEditor" oninput="updateLiveSettings()" style="display: none;">
+
+                        <label>Upload Background</label>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <input type="file" id="bgUploadEditor" accept="image/*" onchange="updateLiveSettings()">
+                            <button id="removeUploadBtn" class="delete-btn-bg"
+                                onclick="removeSpecificBg('upload')">×</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="editor-step" id="step2">
+                    <div class="editor-group">
+                        <label>Text & Emoji</label>
+                        <input type="text" id="textPrimaryEditor" placeholder="Main Title"
+                            oninput="updateLiveSettings()">
+                        <input type="text" id="textSecondaryEditor" placeholder="Sub Title"
+                            oninput="updateLiveSettings()">
+                        <select id="emojiSelectEditor" onchange="updateLiveSettings()">
+                            <option value="">No Emoji</option>
+                            <option value="❤️">❤️ Love</option>
+                            <option value="✨">✨ Sparkle</option>
+                            <option value="📸">📸 Camera</option>
+                            <option value="🌸">🌸 Flower</option>
+                        </select>
+                    </div>
+                    <div class="editor-group">
+                        <label>Date Display</label>
+                        <select id="dateModeEditor" onchange="updateLiveSettings()">
+                            <option value="auto">Auto Date</option>
+                            <option value="custom">Custom Date</option>
+                            <option value="off">Off</option>
+                        </select>
+                        <input type="date" id="customDateEditor" style="display:none" oninput="updateLiveSettings()">
+                    </div>
+                </div>
+
+                <div class="editor-step" id="step3">
+                    <div class="editor-group">
+                        <label>Texture Gallery</label>
+                        <div id="textureGallery" class="texture-gallery"></div>
+                        <button id="removeTextureBtn" class="delete-btn-bg" onclick="removeSpecificBg('texture')"
+                            style="margin-top:10px; width: 100%;">Remove Texture</button>
+                    </div>
+                    <div class="editor-group">
+                        <label>Frame Template</label>
+                        <div id="frameTemplateGallery" class="texture-gallery">
+                        </div>
+                        <button id="removeFrameBtn" style="display: none;" onclick="removeFrameTemplate()">
+                            Remove Frame Template
+                        </button>
+                    </div>
+                </div>
+
+                <div class="step-navigation">
+                    <button id="prevStep" class="nav-btn" style="visibility: hidden;">Previous</button>
+                    <button id="nextStep" class="nav-btn">Next</button>
+                </div>
+
+                <div class="support-text">
+                    <span>Support me:</span>
+                    <a href="https://saweria.co/kukuhg" target="_blank">saweria.co/kukuhg</a>
+                </div>
+            </div>
+
+            <div class="button-two footer-actions" id="finalActions">
+                <button id="download">Download</button>
+                <button id="reset" onclick="location.reload()">Take Again</button>
+                <button class="coffee-btn">Buy a Coffee</button>
+            </div>
+    </section>
+
+    <!-- ================= MODALS ================= -->
+
+    <div id="modal-shot" class="modal">
+        <div class="modal-content">
+            <label>Timer</label>
+            <select id="timer">
+                <option value="3">3s</option>
+                <option value="5">5s</option>
+                <option value="10">10s</option>
+            </select>
+
+            <label>Jumlah Foto</label>
+            <select id="count">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="6">6</option>
+            </select>
+
+            <button id="saveShot">Simpan</button>
+        </div>
+    </div>
+
+    <div id="modal-style" class="modal">
+        <div class="modal-content">
+            <label>Filter</label>
+            <select id="filter">
+                <option value="normal">Normal</option>
+                <option value="bw">B&W</option>
+                <option value="vintage">Vintage</option>
+                <option value="soft">Soft</option>
+                <option value="country">Country</option>
+                <option value="dv">DV Cam</option>
+                <option value="instax">Instax</option>
+            </select>
+            <span>============================</span>
+            <span style="font-size: 10px; color: red;">*Pilih salah satu</span>
+            <label>Custom Template Frame</label>
+            <select id="frameTemplate">
+                <option value="">-</option>
+                <option value="6-kz.png">Template Birthday (6 Foto)</option>
+            </select>
+            <label>Warna Frame</label>
+            <input type="color" id="frameColor" value="#ffffff">
+
+            <label>Atau Custom Background (Image)</label>
+            <input type="file" id="bgUpload" accept="image/*">
+            <p style="font-size: 10px; color: #666;">*Kosongkan jika ingin menggunakan warna/template di atas</p>
+
+            <button id="saveStyle">Simpan</button>
+        </div>
+    </div>
+
+    <div id="modal-text" class="modal">
+        <div class="modal-content">
+            <label>Teks Utama</label>
+            <input id="textPrimary">
+
+            <label>Teks Kedua</label>
+            <input id="textSecondary">
+
+            <label>Emoji</label>
+            <select id="emojiSelect">
+                <option value="">-</option>
+                <option>✨</option>
+                <option>❤️</option>
+                <option>🌸</option>
+            </select>
+
+            <label>Tanggal</label>
+            <select id="dateMode">
+                <option value="auto">Otomatis</option>
+                <option value="custom">Custom</option>
+                <option value="without">-</option>
+            </select>
+
+            <input type="date" id="customDateEditor" style="display:none" oninput="updateLiveSettings()"
+                onkeydown="return false">
+            <button id="saveText">Simpan</button>
+        </div>
+    </div>
+
+    <script>feather.replace()</script>
+    <script src="js/js.js"></script>
 </body>
 
 </html>

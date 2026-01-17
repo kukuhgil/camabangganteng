@@ -37,6 +37,7 @@ const TEXTURES = [
     '6.png',
     '7.png',
 ];
+const EMOJI_LIST = ['❤️', '✨', '⭐', '👑', '🎀', '🍀', '🔥', '🌈', '😎', '📸', '🥳', '🌸', '🦄', '🐾', '🦋', '💎', '☁️', '🧸'];
 
 /* ================= STATE ================= */
 let shots = [];
@@ -47,6 +48,26 @@ let isCounting = false;
 let activeFilter = 'normal';
 let currentStep = 1;
 let isMirrored = true;
+let activeStickers = [];
+let selectedStickerIndex = null;
+let isDraggingSticker = false;
+let needsUpdate = false; // Untuk optimasi RequestAnimationFrame
+let dragOffsetX = 0, dragOffsetY = 0;
+
+function showScreen(screenId) {
+    // Sembunyikan semua screen
+    document.querySelectorAll('.screen').forEach(s => {
+        s.style.display = 'none';
+        s.classList.remove('active');
+    });
+
+    const target = document.getElementById(screenId);
+    if (target) {
+        // Jika booth, gunakan display grid agar rapi sesuai CSS
+        target.style.display = (screenId === 'boothScreen') ? 'grid' : 'flex';
+        setTimeout(() => target.classList.add('active'), 50);
+    }
+}
 
 /* ================= DOM ELEMENTS ================= */
 const video = document.getElementById('video');
@@ -108,6 +129,28 @@ function goToStep(step) {
     currentStep = step;
 }
 
+let selectedSettings = { 
+    timer: USER_SETTINGS.timer, 
+    count: USER_SETTINGS.count 
+};
+
+function updateSelection(type, value, element) {
+    selectedSettings[type] = parseInt(value); // Pastikan jadi angka
+
+    // Visual feedback: Hapus active di kolom yang sama
+    const column = element.closest('.setup-column') || element.parentElement;
+    column.querySelectorAll('.selection-card').forEach(c => c.classList.remove('active'));
+    element.classList.add('active');
+
+    // Aktifkan tombol NEXT jika keduanya sudah dipilih
+    const nextBtn = document.getElementById('btnConfirmSetup');
+    if (selectedSettings.timer !== null && selectedSettings.count !== null) {
+        nextBtn.disabled = false;
+        nextBtn.style.opacity = "1";
+        nextBtn.style.cursor = "pointer";
+    }
+}
+
 document.getElementById('nextStep').onclick = () => {
     if (currentStep < 3) {
         goToStep(currentStep + 1);
@@ -154,6 +197,25 @@ window.onclick = (event) => {
     if (event.target.classList.contains('modal')) closeAllModal();
 };
 
+function confirmSetup() {
+    // 1. Pindahkan nilai dari pilihan kartu ke USER_SETTINGS utama
+    USER_SETTINGS.timer = selectedSettings.timer;
+    USER_SETTINGS.count = selectedSettings.count;
+    
+    // 2. Sinkronkan variabel operasional kamera
+    maxShots = USER_SETTINGS.count; 
+    shots = []; // Reset foto lama
+    currentShot = 0;
+    replaceIndex = null;
+    
+    console.log(`BOOTH READY: ${USER_SETTINGS.timer}s timer, ${USER_SETTINGS.count} photos`);
+
+    // 3. Pindah layar
+    showScreen('boothScreen');
+    
+    // 4. Update slot preview di samping kamera
+    updatePreview();
+}
 /* ================= SETTINGS SAVING ================= */
 document.getElementById('saveShot').onclick = () => {
     USER_SETTINGS.timer = +document.getElementById('timer').value;
@@ -255,6 +317,12 @@ document.getElementById('dateMode').onchange = (e) => {
 };
 
 /* ================= CORE FUNCTIONS ================= */
+function startCameraNow() {
+    showScreen('boothScreen');
+    console.log("Kamera diaktifkan, masuk ke pengaturan timer...");
+    updatePreview();
+}
+
 function updatePreview() {
     previewStrip.innerHTML = '';
     for (let i = 0; i < maxShots; i++) {
@@ -286,6 +354,16 @@ function updatePreview() {
 
         }
         previewStrip.appendChild(box);
+        const filledShots = shots.filter(s => s !== null).length;
+        const nextBtn = document.getElementById('process');
+
+        // Jika foto sudah lengkap sesuai USER_SETTINGS.count, tombol NEXT aktif
+        if (filledShots === maxShots) {
+            nextBtn.disabled = false;
+            nextBtn.classList.add('pulse-animation'); // Tambahan efek visual jika mau
+        } else {
+            nextBtn.disabled = true;
+        }
     }
 
     const filledShots = shots.filter(s => s !== null).length;
@@ -484,11 +562,11 @@ function initTextureGallery() {
 
 function initFrameGallery() {
     const gallery = document.getElementById('frameTemplateGallery');
-    const removeFrameBtn = document.getElementById('removeFrameBtn'); 
+    const removeFrameBtn = document.getElementById('removeFrameBtn');
     if (!gallery) return;
 
     gallery.innerHTML = '';
-    const frames = ['1', '2', '3', '4','5','6','7','8','9','10'];
+    const frames = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
 
     frames.forEach(id => {
         const item = document.createElement('div');
@@ -510,7 +588,7 @@ function initFrameGallery() {
         item.onclick = () => {
             // Logika Pilih Frame
             USER_SETTINGS.frameID = id;
-            
+
             document.querySelectorAll('#frameTemplateGallery .texture-item').forEach(el => el.classList.remove('active'));
             item.classList.add('active');
 
@@ -525,7 +603,7 @@ function initFrameGallery() {
 }
 
 function removeFrameTemplate() {
-    USER_SETTINGS.frameID = null; 
+    USER_SETTINGS.frameID = null;
     document.querySelectorAll('#frameTemplateGallery .texture-item').forEach(el => el.classList.remove('active'));
 
     const removeFrameBtn = document.getElementById('removeFrameBtn');
@@ -586,6 +664,8 @@ window.removeBackground = function () {
 async function makeCollage() {
     const offCanvas = document.createElement('canvas');
     const offCtx = offCanvas.getContext('2d');
+
+
 
     // 1. TENTUKAN UKURAN DASAR (Sesuai Logika Strip)
     const margin = 40;
@@ -736,10 +816,10 @@ async function makeCollage() {
     }
 
     // 5. UPDATE TAMPILAN CANVAS UTAMA
-    const collage = document.getElementById('collage');
-    const cctx = collage.getContext('2d');
-    collage.width = offCanvas.width;
-    collage.height = offCanvas.height;
+    const collageCanvas = document.getElementById('collage');
+    collageCanvas.width = offCanvas.width;
+    collageCanvas.height = offCanvas.height;
+    const cctx = collageCanvas.getContext('2d');
     cctx.drawImage(offCanvas, 0, 0);
 
     // 6. SWITCH SCREEN
@@ -776,9 +856,9 @@ function drawZoomedImage(ctx, img, x, y, w, h, zoom) {
 
 function getFrameCoordinates(totalShots, index, canvasW, canvasH) {
     const marginSide = canvasW * 0.08;
-    const marginTop = canvasH * 0.05;  
-    const gap = 20;                    
-    const footerSpace = 180;           
+    const marginTop = canvasH * 0.05;
+    const gap = 20;
+    const footerSpace = 180;
 
     let x, y, w, h;
 
@@ -818,6 +898,18 @@ function drawImageToRect(targetCtx, img, rect, mode = 'cover') {
 }
 
 /* ================= EVENT HANDLERS ================= */
+const darkModeToggle = document.getElementById('darkModeToggle'); // Sesuaikan ID dengan HTML Anda
+
+if (darkModeToggle) {
+    darkModeToggle.addEventListener('change', () => {
+        if (darkModeToggle.checked) {
+            document.body.classList.add('dark-theme');
+        } else {
+            document.body.classList.remove('dark-theme');
+        }
+    });
+}
+
 document.getElementById('process').onclick = () => {
     maxShots = USER_SETTINGS.count;
     USER_SETTINGS.frameID = null;
@@ -885,12 +977,12 @@ function resetBooth() {
     currentShot = 0;
     replaceIndex = null;
     resultScreen.style.display = 'none';
-    boothScreen.style.display = 'grid';
+    startScreen.style.display = 'flex';
     goToStep(1);
     updatePreview();
 
     resultScreen.classList.remove('active');
     resultScreen.style.display = 'none';
-    boothScreen.style.display = 'grid';
-    boothScreen.classList.add('active');
+    startScreen.style.display = 'flex';
+    startScreen.classList.add('active');
 }
