@@ -18,7 +18,7 @@
 
         <div class="tab-bar center-bottom">
             <button class="tab-btn" data-modal="modal-shot">
-                <i data-feather="clock"></i><span>Shot</span>
+                <i data-feather="clock"></i><span>Capture Settings</span>
             </button>
         </div>
 
@@ -29,20 +29,19 @@
                 <video id="video" autoplay playsinline></video>
                 <canvas id="canvas"></canvas>
                 <button id="shutterBtn"></button>
+                <button id="mirrorBtn" title="Mirror Camera">⟲</button>
             </div>
         </div>
 
         <div class="preview-area">
-            <span
-                style="font-size: 10px; color: #666; display: flex; position: fixed; justify-content: flex-end;margin: 10px;">Klik
-                foto untuk retake foto/tombol X untuk Hapus Foto</span>
-
+            <span class="span-tek ">Klik foto untuk retake foto/tombol X untuk Hapus Foto
+            </span>
             <div id="previewStrip" class="preview-strip">
             </div>
         </div>
-
         <div class="button-one">
             <button id="process" disabled>Proses Hasil Foto</button>
+        </div>
         </div>
     </section>
 
@@ -58,7 +57,7 @@
 
                 <div class="editor-step active" id="step1">
                     <div class="editor-group">
-                        <label>1. Filter & Frame Color</label>
+                        <label>Filter</label>
                         <select id="filterEditor" onchange="updateLiveSettings()">
                             <option value="normal">Normal</option>
                             <option value="bw">B&W</option>
@@ -74,8 +73,7 @@
                             <input type="checkbox" id="useStoreColor" onchange="updateLiveSettings()">
                             Warna Border Frame
                         </label>
-                        <input type="color" id="storeColorEditor" oninput="updateLiveSettings()"
-                            style="display: none;">
+                        <input type="color" id="storeColorEditor" oninput="updateLiveSettings()" style="display: none;">
 
                         <label>Upload Background</label>
                         <div style="display: flex; gap: 8px; align-items: center;">
@@ -88,7 +86,7 @@
 
                 <div class="editor-step" id="step2">
                     <div class="editor-group">
-                        <label>2. Text & Emoji</label>
+                        <label>Text & Emoji</label>
                         <input type="text" id="textPrimaryEditor" placeholder="Main Title"
                             oninput="updateLiveSettings()">
                         <input type="text" id="textSecondaryEditor" placeholder="Sub Title"
@@ -114,16 +112,18 @@
 
                 <div class="editor-step" id="step3">
                     <div class="editor-group">
-                        <label>3. Texture Gallery</label>
+                        <label>Texture Gallery</label>
                         <div id="textureGallery" class="texture-gallery"></div>
                         <button id="removeTextureBtn" class="delete-btn-bg" onclick="removeSpecificBg('texture')"
                             style="margin-top:10px; width: 100%;">Remove Texture</button>
                     </div>
                     <div class="editor-group">
-                        <label>Frame Template (coming soon) </label>
-                        <select id="frameTemplateEditor" onchange="updateLiveSettings()">
-                            <option value="">-</option>
-                        </select>
+                        <label>Frame Template</label>
+                        <div id="frameTemplateGallery" class="texture-gallery">
+                        </div>
+                        <button id="removeFrameBtn" style="display: none;" onclick="removeFrameTemplate()">
+                            Remove Frame Template
+                        </button>
                     </div>
                 </div>
 

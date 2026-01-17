@@ -13,17 +13,21 @@ const USER_SETTINGS = {
     timer: 3,
     count: 2,
     filter: 'normal',
-    frameColor: '#ffffffff',
-    storeColor: '#ffffffff',
+    frameColor: '#ffffff',
+    storeColor: '#000000',
     useStoreColor: false,
     bgImage: null,
     textPrimary: '',
     textSecondary: '',
     emoji: '',
     dateMode: 'auto',
-    customDate: ''
+    customDate: '',
+    frameID: 'null',
+    useTemplate: true
 };
 
+const TEXTURE_PATH = 'texture/'
+const FRAME_PATH = 'frame/'
 const TEXTURES = [
     '1.png',
     '2.png',
@@ -33,7 +37,6 @@ const TEXTURES = [
     '6.png',
     '7.png',
 ];
-const TEXTURE_PATH = 'texture/'
 
 /* ================= STATE ================= */
 let shots = [];
@@ -43,6 +46,7 @@ let replaceIndex = null;
 let isCounting = false;
 let activeFilter = 'normal';
 let currentStep = 1;
+let isMirrored = true;
 
 /* ================= DOM ELEMENTS ================= */
 const video = document.getElementById('video');
@@ -54,13 +58,23 @@ const previewStrip = document.getElementById('previewStrip');
 const shutterBtn = document.getElementById('shutterBtn');
 const boothScreen = document.getElementById('boothScreen');
 const resultScreen = document.getElementById('resultScreen');
+const mirrorBtn = document.getElementById('mirrorBtn');
+
 
 const ctx = canvas.getContext('2d');
 const cctx = collage.getContext('2d');
 
 /* ================= CAMERA SETUP ================= */
 navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-    .then(stream => { video.srcObject = stream; })
+    .then(stream => {
+        video.srcObject = stream;
+
+        if (isMirrored) {
+            video.classList.add('mirrored');
+        } else {
+            video.classList.remove('mirrored');
+        }
+    })
     .catch(err => alert("Kamera tidak diizinkan atau tidak ditemukan"));
 
 /* ================= MULTI-STEP NAVIGATION ================= */
@@ -85,7 +99,10 @@ function goToStep(step) {
         nextBtn.classList.remove('download-mode');
     }
 
-    // Sembunyikan footer-actions lama
+    if (step === 2) {
+        initFrameGallery();
+    }
+
     if (finalActions) finalActions.style.display = 'none';
 
     currentStep = step;
@@ -266,7 +283,7 @@ function updatePreview() {
             };
             box.appendChild(delBtn);
         } else {
-            box.innerHTML = `<span>Foto ${i + 1}</span>`;
+
         }
         previewStrip.appendChild(box);
     }
@@ -287,56 +304,70 @@ async function countdown(sec) {
 shutterBtn.onclick = async () => {
     if (isCounting) return;
 
-    const filledShotsCount = shots.filter(s => s !== null).length;
+    if (shots.length === 0) {
+        shots = new Array(maxShots).fill(null);
+    }
 
-    // 1. Validasi jika slot penuh
-    if (replaceIndex === null && filledShotsCount >= maxShots) {
-        if (confirm("Slot foto sudah penuh. Ingin menghapus foto terakhir dan mengambil ulang?")) {
-            for (let i = shots.length - 1; i >= 0; i--) {
-                if (shots[i] !== null) {
-                    shots[i] = null;
-                    break;
-                }
-            }
+    let emptyIdx = shots.findIndex(slot => slot === null);
+
+    if (replaceIndex === null && emptyIdx === -1) {
+        if (confirm("Slot foto sudah penuh. Ingin reset semua dan ambil ulang?")) {
+            shots = new Array(maxShots).fill(null);
+            updatePreview();
+            emptyIdx = 0;
         } else {
             return;
         }
     }
 
     isCounting = true;
-    await countdown(USER_SETTINGS.timer);
 
-    flash.classList.add('flash');
-    setTimeout(() => flash.classList.remove('flash'), 300);
+    const loopStart = (replaceIndex !== null) ? 0 : (emptyIdx === -1 ? 0 : emptyIdx);
+    const loopEnd = (replaceIndex !== null) ? 1 : maxShots;
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.save();
-    ctx.translate(canvas.width, 0);
-    ctx.scale(-1, 1);
-    ctx.drawImage(video, 0, 0);
-    ctx.restore();
+    for (let i = loopStart; i < loopEnd; i++) {
+        let targetIndex = (replaceIndex !== null) ? replaceIndex : i;
 
-    const data = canvas.toDataURL('image/png');
+        if (replaceIndex === null && shots[targetIndex]) continue;
+        console.log(`Mengambil foto ke-${targetIndex + 1}`);
+        await countdown(USER_SETTINGS.timer);
 
-    if (replaceIndex !== null) {
-        shots[replaceIndex] = data;
-        replaceIndex = null;
-    } else {
-        let emptySlotIndex = shots.findIndex(slot => slot === null);
+        flash.classList.add('flash');
+        setTimeout(() => flash.classList.remove('flash'), 300);
 
-        if (emptySlotIndex !== -1 && emptySlotIndex < maxShots) {
-            shots[emptySlotIndex] = data;
-        } else if (shots.length < maxShots) {
-            shots.push(data);
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        ctx.save();
+        if (isMirrored) {
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+        }
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
+
+        // --- SIMPAN DATA ---
+        const data = canvas.toDataURL('image/png');
+        shots[targetIndex] = data;
+
+        updatePreview();
+
+        // Jika mode ganti foto (replace) selesai, langsung stop loop
+        if (replaceIndex !== null) {
+            replaceIndex = null;
+            break;
+        }
+
+        if (i < loopEnd - 1) {
+            await new Promise(r => setTimeout(r, 1500));
         }
     }
 
-    updatePreview();
     isCounting = false;
 };
 
 function getContrastColor(hexColor) {
+    if (!hexColor) return '#000000';
     const hex = hexColor.replace('#', '');
     const r = parseInt(hex.substr(0, 2), 16);
     const g = parseInt(hex.substr(2, 2), 16);
@@ -451,6 +482,58 @@ function initTextureGallery() {
     });
 }
 
+function initFrameGallery() {
+    const gallery = document.getElementById('frameTemplateGallery');
+    const removeFrameBtn = document.getElementById('removeFrameBtn'); 
+    if (!gallery) return;
+
+    gallery.innerHTML = '';
+    const frames = ['1', '2', '3', '4','5','6','7','8','9','10'];
+
+    frames.forEach(id => {
+        const item = document.createElement('div');
+        item.className = 'texture-item';
+
+        const fullPath = `${FRAME_PATH}${maxShots}/${id}.png`;
+
+        item.style.backgroundImage = `url('${fullPath}')`;
+        item.style.backgroundSize = 'contain';
+        item.style.backgroundRepeat = 'no-repeat';
+        item.style.backgroundPosition = 'center';
+        item.style.borderRadius = '4px';
+
+        if (USER_SETTINGS.frameID === id) {
+            item.classList.add('active');
+            if (removeFrameBtn) removeFrameBtn.style.display = 'block';
+        }
+
+        item.onclick = () => {
+            // Logika Pilih Frame
+            USER_SETTINGS.frameID = id;
+            
+            document.querySelectorAll('#frameTemplateGallery .texture-item').forEach(el => el.classList.remove('active'));
+            item.classList.add('active');
+
+            // Munculkan tombol hapus saat frame dipilih
+            if (removeFrameBtn) removeFrameBtn.style.display = 'block';
+
+            makeCollage();
+        };
+
+        gallery.appendChild(item);
+    });
+}
+
+function removeFrameTemplate() {
+    USER_SETTINGS.frameID = null; 
+    document.querySelectorAll('#frameTemplateGallery .texture-item').forEach(el => el.classList.remove('active'));
+
+    const removeFrameBtn = document.getElementById('removeFrameBtn');
+    if (removeFrameBtn) removeFrameBtn.style.display = 'none';
+
+    makeCollage();
+}
+
 window.removeSpecificBg = function (type) {
     USER_SETTINGS.bgImage = null;
 
@@ -504,10 +587,10 @@ async function makeCollage() {
     const offCanvas = document.createElement('canvas');
     const offCtx = offCanvas.getContext('2d');
 
+    // 1. TENTUKAN UKURAN DASAR (Sesuai Logika Strip)
     const margin = 40;
     const photoW = 375;
     const photoH = 500;
-
     const isDoubleStrip = maxShots > 3;
     const shotsPerStrip = isDoubleStrip ? Math.ceil(maxShots / 2) : maxShots;
     const singleStripW = photoW + (margin * 2);
@@ -515,88 +598,67 @@ async function makeCollage() {
     offCanvas.width = isDoubleStrip ? (singleStripW * 2) : singleStripW;
     offCanvas.height = (photoH * shotsPerStrip) + (margin * (shotsPerStrip + 1)) + 180;
 
-    offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
+    // 2. LOAD FRAME TEMPLATE (Hanya jika ada frameID yang dipilih)
+    let useFramePNG = false;
+    const frameImg = new Image();
 
-    const renderStripSection = async (offsetX, startIndex, isRightStrip) => {
+    if (USER_SETTINGS.frameID) {
+        const currentFramePath = `frame/${maxShots}/${USER_SETTINGS.frameID}.png`;
+        frameImg.crossOrigin = "anonymous";
+        frameImg.src = `${currentFramePath}?t=${new Date().getTime()}`;
+
+        try {
+            await new Promise((resolve) => {
+                frameImg.onload = () => {
+                    useFramePNG = true;
+                    resolve();
+                };
+                frameImg.onerror = () => {
+                    console.warn("Template Frame tidak ditemukan di:", currentFramePath);
+                    useFramePNG = false;
+                    resolve();
+                };
+            });
+        } catch (e) { useFramePNG = false; }
+    }
+
+    // 3. FUNGSI RENDER PER STRIP
+    const renderStripSection = async (offsetX, isRightStrip) => {
         const stripRect = { x: offsetX, y: 0, w: singleStripW, h: offCanvas.height };
         let textColor = "#000000";
 
-        const hasBackground = USER_SETTINGS.bgImage !== null;
-        const borderThickness = (USER_SETTINGS.useStoreColor && !hasBackground) ? 15 : 0;
-        const isUpload = USER_SETTINGS.bgImage && !USER_SETTINGS.bgImage.includes(TEXTURE_PATH);
-
-        if (hasBackground) {
+        // --- A. DRAW BACKGROUND ---
+        if (USER_SETTINGS.bgImage) {
             const bgImg = new Image();
             bgImg.src = USER_SETTINGS.bgImage;
             await new Promise(r => bgImg.onload = r);
 
-            const isTexture = USER_SETTINGS.bgImage.includes(TEXTURE_PATH);
+            const isTexture = USER_SETTINGS.bgImage.includes('texture/');
+
             drawImageToRect(offCtx, bgImg, stripRect, isTexture ? 'fit' : 'cover');
 
-            textColor = getContrastColor(getAverageColor(bgImg));
+            if (typeof getAverageColor === 'function') {
+                textColor = getContrastColor(getAverageColor(bgImg));
+            }
         } else {
+            offCtx.fillStyle = USER_SETTINGS.useStoreColor ? USER_SETTINGS.storeColor : USER_SETTINGS.frameColor;
+            offCtx.fillRect(stripRect.x, stripRect.y, stripRect.w, stripRect.h);
 
             if (USER_SETTINGS.useStoreColor) {
-                offCtx.fillStyle = USER_SETTINGS.storeColor;
-                offCtx.fillRect(stripRect.x, stripRect.y, stripRect.w, stripRect.h);
+                const border = 15;
+                offCtx.fillStyle = USER_SETTINGS.frameColor;
+                offCtx.fillRect(stripRect.x + border, stripRect.y + border, stripRect.w - (border * 2), stripRect.h - (border * 2));
             }
-
-            const innerRect = {
-                x: stripRect.x + borderThickness,
-                y: stripRect.y + borderThickness,
-                w: stripRect.w - (borderThickness * 2),
-                h: stripRect.h - (borderThickness * 2)
-            };
-
-            offCtx.fillStyle = USER_SETTINGS.frameColor;
-            offCtx.fillRect(innerRect.x, innerRect.y, innerRect.w, innerRect.h);
             textColor = getContrastColor(USER_SETTINGS.frameColor);
         }
 
-        if (isUpload) {
-            const bgImg = new Image();
-            bgImg.src = USER_SETTINGS.bgImage;
-            await new Promise(r => bgImg.onload = r);
-
-            drawImageToRect(offCtx, bgImg, stripRect, 'cover');
-            textColor = getContrastColor(getAverageColor(bgImg));
-        } else {
-
-            if (USER_SETTINGS.useStoreColor) {
-                offCtx.fillStyle = USER_SETTINGS.storeColor;
-                offCtx.fillRect(stripRect.x, stripRect.y, stripRect.w, stripRect.h);
-            }
-
-            const innerRect = {
-                x: stripRect.x + borderThickness,
-                y: stripRect.y + borderThickness,
-                w: stripRect.w - (borderThickness * 2),
-                h: stripRect.h - (borderThickness * 2)
-            };
-
-            if (USER_SETTINGS.bgImage) {
-                const bgImg = new Image();
-                bgImg.src = USER_SETTINGS.bgImage;
-                await new Promise(r => bgImg.onload = r);
-
-                offCtx.save();
-                offCtx.beginPath();
-                offCtx.rect(innerRect.x, innerRect.y, innerRect.w, innerRect.h);
-                offCtx.clip();
-                drawImageToRect(offCtx, bgImg, innerRect, 'fit');
-                offCtx.restore();
-                textColor = getContrastColor(getAverageColor(bgImg));
-            } else {
-                offCtx.fillStyle = USER_SETTINGS.frameColor;
-                offCtx.fillRect(innerRect.x, innerRect.y, innerRect.w, innerRect.h);
-                textColor = getContrastColor(USER_SETTINGS.frameColor);
-            }
-        }
-
-        // --- 2. GAMBAR FOTO ---
+        // --- B. DRAW PHOTOS (Di bawah frame) ---
         for (let i = 0; i < shotsPerStrip; i++) {
-            const currentIdx = startIndex + i;
-            if (!shots[currentIdx]) continue;
+            let currentIdx = isDoubleStrip
+                ? (isRightStrip ? (i * 2 + 1) : (i * 2))
+                : i;
+
+            if (currentIdx >= maxShots || !shots[currentIdx]) continue;
 
             const img = new Image();
             img.src = shots[currentIdx];
@@ -608,6 +670,7 @@ async function makeCollage() {
             offCtx.save();
             offCtx.filter = FILTERS[USER_SETTINGS.filter] || 'none';
 
+            // Cropping otomatis 4:3
             const targetRatio = photoW / photoH;
             const imgRatio = img.width / img.height;
             let sx, sy, sw, sh;
@@ -622,49 +685,33 @@ async function makeCollage() {
             offCtx.drawImage(img, sx, sy, sw, sh, posX, posY, photoW, photoH);
             offCtx.restore();
 
-            // Tambahkan garis pinggir pada foto jika store color aktif (Optional tapi bagus)
-            /*if (USER_SETTINGS.useStoreColor && !isUpload) {
-                 offCtx.strokeStyle = USER_SETTINGS.storeColor;
-                 offCtx.lineWidth = 4;
-                 offCtx.strokeRect(posX, posY, photoW, photoH);
-             }*/
-
+            // Render Emoji
             if (USER_SETTINGS.emoji) {
-                offCtx.save();
-                offCtx.fillStyle = textColor;
                 offCtx.font = "45px Arial";
-                offCtx.textAlign = "center";
-                offCtx.textBaseline = "middle";
-                offCtx.fillText(USER_SETTINGS.emoji, posX + photoW - 35, posY + 35);
-                offCtx.fillText(USER_SETTINGS.emoji, posX + 35, posY + (photoH / 2));
-                offCtx.fillText(USER_SETTINGS.emoji, posX + photoW - 35, posY + photoH - 35);
-                offCtx.restore();
+                offCtx.fillStyle = textColor;
+                offCtx.fillText(USER_SETTINGS.emoji, posX + 20, posY + 50);
             }
         }
 
-        // 3. RENDER TEKS
-        offCtx.save();
+        // --- C. DRAW FRAME PNG OVERLAY (Layer paling atas) ---
+        if (useFramePNG) {
+            offCtx.drawImage(frameImg, offsetX, 0, singleStripW, offCanvas.height);
+        }
+
+        // --- D. RENDER TEKS & TANGGAL ---
         offCtx.fillStyle = textColor;
         offCtx.textAlign = "center";
         const centerX = offsetX + (singleStripW / 2);
         let textY = offCanvas.height - 120;
 
-        let primary = USER_SETTINGS.textPrimary;
-        let secondary = USER_SETTINGS.textSecondary;
-
-        if (isDoubleStrip && isRightStrip) {
-            primary = USER_SETTINGS.textPrimaryRight || USER_SETTINGS.textPrimary;
-            secondary = USER_SETTINGS.textSecondaryRight || USER_SETTINGS.textSecondary;
-        }
-
-        if (primary) {
+        if (USER_SETTINGS.textPrimary) {
             offCtx.font = "bold 40px Arial";
-            offCtx.fillText(primary, centerX, textY);
+            offCtx.fillText(USER_SETTINGS.textPrimary, centerX, textY);
             textY += 45;
         }
-        if (secondary) {
+        if (USER_SETTINGS.textSecondary) {
             offCtx.font = "22px Arial";
-            offCtx.fillText(secondary, centerX, textY);
+            offCtx.fillText(USER_SETTINGS.textSecondary, centerX, textY);
         }
 
         let dateStr = "";
@@ -675,56 +722,96 @@ async function makeCollage() {
             const p = USER_SETTINGS.customDate.split('-');
             if (p.length === 3) dateStr = `${p[2]}/${p[1]}/${p[0]}`;
         }
-        if (dateStr) {
+
+        if (dateStr && USER_SETTINGS.dateMode !== 'off' && USER_SETTINGS.dateMode !== 'without') {
             offCtx.font = "italic 18px Arial";
             offCtx.fillText(dateStr, centerX, offCanvas.height - 35);
         }
-        offCtx.restore();
     };
 
-    // Render Strip Pertama (Selalu Ada)
-    await renderStripSection(0, 0, false);
-
-    // Render Strip Kedua (Hanya jika foto > 3)
+    // 4. EKSEKUSI RENDER
+    await renderStripSection(0, false);
     if (isDoubleStrip) {
-        await renderStripSection(singleStripW, shotsPerStrip, true);
-        if (USER_SETTINGS.useStoreColor) {
-            offCtx.fillStyle = USER_SETTINGS.storeColor;
-            offCtx.fillRect(singleStripW - 5, 0, 10, offCanvas.height);
-        }
+        await renderStripSection(singleStripW, true);
     }
 
+    // 5. UPDATE TAMPILAN CANVAS UTAMA
+    const collage = document.getElementById('collage');
+    const cctx = collage.getContext('2d');
     collage.width = offCanvas.width;
     collage.height = offCanvas.height;
     cctx.drawImage(offCanvas, 0, 0);
 
-    // Navigasi Layar
-    if (boothScreen.classList.contains('active') || boothScreen.style.display !== 'none') {
-        boothScreen.classList.remove('active');
-        boothScreen.style.display = 'none';
-        resultScreen.style.display = 'flex';
-        resultScreen.classList.add('active');
+    // 6. SWITCH SCREEN
+    document.getElementById('boothScreen').style.display = 'none';
+    const resultScreen = document.getElementById('resultScreen');
+    resultScreen.style.display = 'flex';
+    resultScreen.classList.add('active');
+}
+
+function drawZoomedImage(ctx, img, x, y, w, h, zoom) {
+    const imgRatio = img.width / img.height;
+    const targetRatio = w / h;
+    let sx, sy, sw, sh;
+
+    if (imgRatio > targetRatio) {
+        sh = img.height;
+        sw = img.height * targetRatio;
+        sx = (img.width - sw) / 2;
+        sy = 0;
+    } else {
+        sw = img.width;
+        sh = img.width / targetRatio;
+        sx = 0;
+        sy = (img.height - sh) / 2;
     }
+
+    const zoomW = sw / zoom;
+    const zoomH = sh / zoom;
+    const zoomX = sx + (sw - zoomW) / 2;
+    const zoomY = sy + (sh - zoomH) / 2;
+
+    ctx.drawImage(img, zoomX, zoomY, zoomW, zoomH, x, y, w, h);
+}
+
+function getFrameCoordinates(totalShots, index, canvasW, canvasH) {
+    const marginSide = canvasW * 0.08;
+    const marginTop = canvasH * 0.05;  
+    const gap = 20;                    
+    const footerSpace = 180;           
+
+    let x, y, w, h;
+
+    if (totalShots == 4) {
+        // Mode Grid 2x2
+        w = (canvasW - (marginSide * 2) - gap) / 2;
+        h = (canvasH - marginTop - footerSpace - gap) / 2;
+        x = marginSide + (index % 2) * (w + gap);
+        y = marginTop + Math.floor(index / 2) * (h + gap);
+    } else {
+        // Mode Strip Vertikal (untuk 2 atau 3 foto)
+        w = canvasW - (marginSide * 2);
+        h = (canvasH - marginTop - footerSpace - (gap * (totalShots - 1))) / totalShots;
+        x = marginSide;
+        y = marginTop + (index * (h + gap));
+    }
+
+    return { x, y, w, h };
 }
 
 function drawImageToRect(targetCtx, img, rect, mode = 'cover') {
-    const imgRatio = img.width / img.height;
-    const rectRatio = rect.w / rect.h;
-    let sx, sy, sw, sh;
-
     if (mode === 'fit') {
-        targetCtx.drawImage(img, rect.x, rect.y, rect.w, rect.h);
+        targetCtx.drawImage(img, 0, 0, img.width, img.height, rect.x, rect.y, rect.w, rect.h);
     } else {
+        const imgRatio = img.width / img.height;
+        const rectRatio = rect.w / rect.h;
+        let sx, sy, sw, sh;
         if (imgRatio > rectRatio) {
-            sh = img.height;
-            sw = img.height * rectRatio;
-            sx = (img.width - sw) / 2;
-            sy = 0;
+            sh = img.height; sw = img.height * rectRatio;
+            sx = (img.width - sw) / 2; sy = 0;
         } else {
-            sw = img.width;
-            sh = img.width / rectRatio;
-            sx = 0;
-            sy = (img.height - sh) / 2;
+            sw = img.width; sh = img.width / rectRatio;
+            sx = 0; sy = (img.height - sh) / 2;
         }
         targetCtx.drawImage(img, sx, sy, sw, sh, rect.x, rect.y, rect.w, rect.h);
     }
@@ -732,14 +819,32 @@ function drawImageToRect(targetCtx, img, rect, mode = 'cover') {
 
 /* ================= EVENT HANDLERS ================= */
 document.getElementById('process').onclick = () => {
+    maxShots = USER_SETTINGS.count;
+    USER_SETTINGS.frameID = null;
+    USER_SETTINGS.frameColor = '#ffffff';
+    USER_SETTINGS.bgImage = null;
+    initFrameGallery();
     syncEditorInputs();
     makeCollage();
 };
 
+if (mirrorBtn) {
+    mirrorBtn.onclick = () => {
+        isMirrored = !isMirrored;
+
+        if (isMirrored) {
+            video.classList.add('mirrored');
+        } else {
+            video.classList.remove('mirrored');
+        }
+        console.log("Mirror mode:", isMirrored);
+    };
+}
+
 function resetToDefaultSettings() {
     // 1. Reset Data Objek
     USER_SETTINGS.filter = 'normal';
-    USER_SETTINGS.frameColor = '#ffffffff';
+    USER_SETTINGS.frameColor = '#ffffff';
     USER_SETTINGS.useStoreColor = false;
     USER_SETTINGS.bgImage = null;
     USER_SETTINGS.textPrimary = '';
@@ -747,13 +852,14 @@ function resetToDefaultSettings() {
     USER_SETTINGS.emoji = '';
     USER_SETTINGS.dateMode = 'auto';
     USER_SETTINGS.customDate = '';
+    USER_SETTINGS.frameID = null;
 
 
     // 2. Reset Visual Input (Layar Editor)
     if (document.getElementById('filterEditor')) {
         document.getElementById('filterEditor').value = 'normal';
-        document.getElementById('frameColorEditor').value = '#ffffffff';
-        document.getElementById('storeColorEditor').value = '#ffffffff';
+        document.getElementById('frameColorEditor').value = '#ffffff';
+        document.getElementById('storeColorEditor').value = '#000000';
         document.getElementById('textPrimaryEditor').value = '';
         document.getElementById('textSecondaryEditor').value = '';
         document.getElementById('emojiSelectEditor').value = '';
@@ -778,10 +884,10 @@ function resetBooth() {
     shots = [];
     currentShot = 0;
     replaceIndex = null;
-
-    resetToDefaultSettings();
-    updatePreview();
+    resultScreen.style.display = 'none';
+    boothScreen.style.display = 'grid';
     goToStep(1);
+    updatePreview();
 
     resultScreen.classList.remove('active');
     resultScreen.style.display = 'none';

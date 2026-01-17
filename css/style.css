@@ -11,7 +11,6 @@
 * {
     box-sizing: border-box;
     font-family: 'Jost', sans-serif;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 html,
@@ -127,12 +126,10 @@ body {
 /* ===== BOOTH SCREEN (LANDSCAPE) ===== */
 #boothScreen {
     display: none;
-    /* Default */
     grid-template-columns: 1fr 800px;
-    /* Area Kamera | Area Preview */
     gap: 20px;
-    padding: 80px;
-    height: 100vh;
+    padding: 60px 60px 0 60px;
+    max-height: 100vh;
     overflow: hidden;
 }
 
@@ -144,7 +141,7 @@ body {
 .booth {
     position: relative;
     width: 820px;
-    height: 515px;
+    height: 565px;
     border-radius: 24px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
     overflow: hidden;
@@ -161,14 +158,40 @@ body {
     aspect-ratio: 16 / 9;
 }
 
+#video.mirrored {
+    transform: scaleX(-1) !important;
+    -webkit-transform: scaleX(-1) !important;
+}
+
+/* Styling tombol (opsional agar terlihat) */
+#mirrorBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+    padding: 8px 15px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: 1px solid white;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
 video,
 canvas {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transform: scaleX(-1);
-    -webkit-transform: scaleX(-1);
     filter: sepia(0.1) contrast(1.05) brightness(1.05);
+}
+
+.span-tek {
+    font-size: 10px;
+    color: #666;
+    display: flex;
+    position: fixed;
+    justify-content: flex-end;
+    margin: 20px;
 }
 
 /* ===== CONTROLS PANEL ===== */
@@ -253,16 +276,18 @@ canvas {
 }
 
 .result-tools {
-    position: relative; /* Bukan fixed lagi */
+    position: relative;
+    /* Bukan fixed lagi */
     bottom: 0;
     margin-top: 20px;
-    background: white; /* Beri kontras agar terlihat di atas background app */
+    background: white;
+    /* Beri kontras agar terlihat di atas background app */
     transform: none;
     left: 0;
 }
 
 .editor-tools {
-position: relative; /* Menempel di bawah canvas, bukan melayang di tengah */
+    position: relative;
     bottom: 0;
     left: 0;
     transform: none;
@@ -280,7 +305,7 @@ position: relative; /* Menempel di bawah canvas, bukan melayang di tengah */
     padding: 30px;
     box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
     transform: rotate(-1deg);
-    
+
 }
 
 
@@ -315,34 +340,29 @@ position: relative; /* Menempel di bawah canvas, bukan melayang di tengah */
 }
 
 .preview-strip {
-    width: 525px;
-    height: 520px;
+    width: 500px;
     border-radius: 12px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    background: rgba(255, 255, 255, 0.3);
     gap: 20px;
     padding: 40px;
-    margin-bottom: 10px;
-    grid-template-columns: repeat(2, 1fr);
 }
 
 
 .preview-strip div {
-    color: #999;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.preview-strip img,
-.preview-strip div {
-    width: 120px;
-    height: 100px;
+.preview-strip img {
+    width: 180px;
+    height: 140px;
     /* 4:3 */
     object-fit: contain;
     cursor: pointer;
     transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
 }
 
 .preview-strip img:hover {
@@ -478,20 +498,13 @@ position: relative; /* Menempel di bawah canvas, bukan melayang di tengah */
     z-index: 999;
 }
 
-.preview-area {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    border-radius: 15px;
-}
 
 .button-one {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center; /* Tambahkan ini */
+    justify-content: flex-end;
+    align-items: flex-end;
     width: 100%;
     gap: 15px;
-    min-height: 50px; /* Beri tinggi minimum agar tidak kempis saat reset */
+    min-height: 50px;
 }
 
 .button-two {
@@ -501,7 +514,12 @@ position: relative; /* Menempel di bawah canvas, bukan melayang di tengah */
     gap: 20px;
 }
 
-
+.span-tek {
+    font-size: 10px;
+    color: #666;
+    display: flex;
+    justify-content: flex-end;
+}
 
 .preview-actions {
     display: flex;
@@ -533,7 +551,6 @@ position: relative; /* Menempel di bawah canvas, bukan melayang di tengah */
     border: none;
     border-radius: 4px;
     padding: 12px 20px;
-    /* Menambah padding horizontal agar lebih proporsional */
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -543,7 +560,6 @@ position: relative; /* Menempel di bawah canvas, bukan melayang di tengah */
     width: auto;
     align-items: center;
     display: inline-block;
-    /* Agar bisa berjejer jika ada ruang ** Agar tombol memenuhi lebar container di mobile */
 }
 
 /* Efek saat tombol di-hover */
@@ -567,7 +583,8 @@ button:disabled {
 /* Layout Hasil: Kiri Foto, Kanan Settings */
 .result-container {
     display: grid;
-    grid-template-columns: 0.8fr 0.8fr; /* Proporsi kiri lebih besar */
+    grid-template-columns: 0.8fr 0.8fr;
+    /* Proporsi kiri lebih besar */
     width: 100%;
     max-width: 1200px;
     gap: 20px;
@@ -606,7 +623,8 @@ button:disabled {
     color: var(--text);
 }
 
-.editor-group input, .editor-group select {
+.editor-group input,
+.editor-group select {
     padding: 10px;
     border-radius: 8px;
     border: 1px solid #ccc;
@@ -615,7 +633,9 @@ button:disabled {
 
 
 /* Sembunyikan tab-bar-dua jika sudah dipindah ke kanan */
-.tab-bar-dua { display: none; }
+.tab-bar-dua {
+    display: none;
+}
 
 /* Responsif untuk Mobile */
 @media (max-width: 900px) {
@@ -641,7 +661,7 @@ button:disabled {
     align-items: center;
     justify-content: center;
     z-index: 10;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .delete-btn:hover {
@@ -674,7 +694,7 @@ button:disabled {
 
 .texture-item.active {
     border-color: var(--accent);
-    box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
 /* Tombol Hapus Background */
@@ -687,25 +707,43 @@ button:disabled {
     height: 30px;
     cursor: pointer;
     font-weight: bold;
-    display: none; /* Default sembunyi, diatur lewat JS */
+    display: none;
     align-items: center;
     justify-content: center;
-    margin-left: 5px;
-    flex-shrink: 0;
+    margin: 0 5px 0 5px;
 }
 
 .delete-btn-bg:hover {
     background: #cc0000;
 }
 
+#removeFrameBtn {
+    cursor: pointer;
+    color: white;
+    border: none;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    margin: 0 5px 0 5px;
+    padding: 5px;
+    background: #ff4d4d;
+}
+
+#removeFrameBtn:hover {
+    background: #cc0000;
+}
+
+
 .result-container {
     display: grid;
-    grid-template-columns: 1fr 400px; /* Lebar panel editor tetap 400px agar rapi */
+    grid-template-columns: 1fr 400px;
+    /* Lebar panel editor tetap 400px agar rapi */
     width: 100%;
     max-width: 1200px;
     gap: 1px;
     margin: 0 auto;
-    padding: 50px 50px 0 0 ;
+    padding: 50px 50px 0 0;
     align-items: start;
 }
 
@@ -717,7 +755,8 @@ button:disabled {
     border: 1px solid rgba(255, 255, 255, 0.3);
     display: flex;
     flex-direction: column;
-    min-height: 520px; /* Tinggi konsisten agar tidak goyang saat ganti slide */
+    min-height: 520px;
+    /* Tinggi konsisten agar tidak goyang saat ganti slide */
     position: relative;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
@@ -742,6 +781,7 @@ button:disabled {
         opacity: 0;
         transform: translateX(15px);
     }
+
     to {
         opacity: 1;
         transform: translateX(0);
@@ -761,19 +801,19 @@ button:disabled {
 /* ================= NAVIGATION BUTTONS ================= */
 
 .step-navigation {
-    margin-top: auto; /* Memaksa navigasi selalu berada di bawah panel */
+    margin-top: auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding-top: 20px;
-    border-top: 1px solid rgba(0,0,0,0.05);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 /* Tombol Next & Previous di kanan bawah */
 .nav-controls {
     display: flex;
     gap: 10px;
-    margin-left: auto; /* Geser ke kanan sesuai permintaan */
+    margin-left: auto;
 }
 
 .nav-btn {
@@ -798,18 +838,20 @@ button:disabled {
 
 .nav-btn:hover:not(:disabled) {
     transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
-.footer-actions{
+
+.footer-actions {
     display: flex;
     position: relative;
     justify-content: flex-end;
     padding: 10px;
 }
+
 /* ================= FINAL ACTIONS (STEP TERAKHIR) ================= */
 
 #finalActions {
-    display: none; /* Muncul hanya di step terakhir via JS */
+    display: none;
     flex-direction: column;
     gap: 10px;
     margin-top: 20px;
@@ -822,6 +864,202 @@ button:disabled {
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+#frameTemplateGallery .texture-item {
+    width: 50px;
+    /* Lebih lebar sedikit untuk frame */
+    height: 75px;
+    /* Lebih tinggi untuk frame */
+    border-radius: 4px;
+    /* Kotak, bukan bulat */
+    background-color: #fff;
+    border: 1px solid #ddd;
+}
+
+#frameTemplateGallery .texture-item.active {
+    border: 2px solid var(--accent);
+}
+
+/*MEDIAAAAAAAAAAAAA QUErYYYYYYYYYYYYY*/
+
+/* ============================================================
+   MEDIA QUERIES UNTUK SKALA LAPTOP & IPAD
+   (Tambahkan di bagian paling bawah file CSS Anda)
+   ============================================================ */
+
+/* 1. Skala untuk Laptop (Layar sedang/kecil) */
+/* ============================================================
+   MEDIA QUERIES UNTUK SKALA LAPTOP & IPAD
+   ============================================================ */
+
+/* 1. Skala untuk Laptop (Layar sedang/kecil) */
+@media (max-width: 1366px) {
+    #boothScreen {
+        grid-template-columns: 1fr 350px;
+        padding: 30px;
+    }
+
+    .booth {
+        width: 100%;
+        max-width: 700px;
+        height: auto;
+        aspect-ratio: 820 / 565;
+    }
+
+    .result-container {
+        grid-template-columns: 1fr 380px;
+        padding: 30px;
+    }
+
+    /* Penyesuaian class span-tek di laptop */
+    .span-tek {
+        margin: 10px;
+        font-size: 9px;
+    }
+}
+
+/* 2. Skala untuk iPad & Tablet (Portrait/Landscape) */
+@media (max-width: 1024px) {
+
+    html,
+    body {
+        max-height: none;
+    }
+
+    .app {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    #boothScreen {
+        justify-items: left;
+        grid-template-columns: 1fr;
+        overflow-y: hidden;
+    }
+
+    .button-one {
+        display: flex;
+        position: relative;
+        justify-items: center;
+        align-items: center;
+    }
+
+    .result-container {
+        grid-template-columns: 1.1fr 1.1fr;
+        justify-items: center;
+        gap: 20px;
+        padding: 50px;
+    }
+
+    .booth {
+        max-width: 100%;
+        height: 500px;
+    }
+
+    .preview-strip {
+        max-width: 100%;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .result-right {
+        width: 100%;
+        max-width: 500px;
+        margin-top: 50%;
+        justify-content: center;
+    }
+
+    #collage {
+        max-width: 90%;
+        transform: none;
+    }
+
+    .span-tek {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-end;
+        width: 100%;
+    }
+}
+@media (max-width: 768px) {
+
+    html,
+    body {
+        max-height: none;
+    }
+
+    .app {
+        height: auto;
+        min-height: 100vh;
+    }
+
+    #boothScreen {
+        justify-items: left;
+        grid-template-columns: 1fr;
+        overflow-y: hidden;
+    }
+
+    .button-one {
+        display: flex;
+        position: relative;
+        justify-items: center;
+        align-items: center;
+    }
+
+    .result-container {
+        grid-template-columns: 1.1fr 1.1r;
+        justify-items: center;
+        gap: 12px;
+        padding: 50px;
+    }
+
+    .booth {
+        max-width: 100%;
+        height: 400px;
+    }
+
+    .preview-strip {
+        max-width: 100%;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .result-right {
+        padding: 20px;
+        width: 100%;
+        max-width: 320px;
+        margin-top: 30%;
+        justify-content: center;
+    }
+
+    #collage {
+        max-width: 85%;
+        transform: none;
+    }
+
+    .span-tek {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-end;
+        width: 100%;
+    }
+}
+
+/* 3. Penyesuaian khusus tinggi layar pendek */
+@media (max-height: 700px) {
+    .booth {
+        max-width: 600px;
+    }
+
+    #startScreen h1 {
+        font-size: 3rem;
+    }
 }
