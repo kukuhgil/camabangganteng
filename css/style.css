@@ -862,7 +862,7 @@ canvas {
 }
 
 #collage {
-    max-height: 80vh;
+    max-height: 50vh;
     width: auto;
     max-width: 50%;
 }
