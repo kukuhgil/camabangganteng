@@ -1,4 +1,8 @@
 Simple Photobooth Website Build using html, css, and js (only pc and ipad potrait i'll fix soon )
+Beta version 0.2
+Add New UI ( Beta ), Layout
+
+
 
 Feature:
 Shot: Timer, Set Count Foto
