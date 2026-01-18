@@ -1,13 +1,22 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Jost:wght@300;400;600&display=swap');
 
 :root {
-    --blue: #e8e2d6;
-    --pink: #d4a373;
-    --accent: #a9b388;
-    --dark: #5f6b5d;
-    --text: #432818;
-    --bg-gradient: radial-gradient(circle at top left, var(--blue), #d6ccc2);
-    --card-bg: rgba(255, 255, 255, 0.5);
+    /* LIGHT MODE (Primary: #212121) */
+    --blue: #ffffff;
+    /* Background bersih */
+    --pink: #212121;
+    /* Warna utama (Button/Text) */
+    --accent: #424242;
+    /* Warna aksen sedikit lebih terang */
+    --dark: #000000;
+    /* Kontras terdalam */
+    --text: #212121;
+    /* Teks utama */
+    --bg-gradient: radial-gradient(circle at top left, #ffffff, #f0f0f0);
+    --card-bg: rgba(33, 33, 33, 0.05);
+    /* Soft grey tint */
+    --border-color: rgba(33, 33, 33, 0.1);
+    --shadow-color: rgba(0, 0, 0, 0.1);
 }
 
 * {
@@ -25,11 +34,20 @@ body {
 }
 
 body.dark-theme {
-    --blue: #1a1a1a;
-    --text: #e8e2d6;
-    --dark: #a9b388;
-    --bg-gradient: radial-gradient(circle at top left, #2c3e50, #000000);
-    --card-bg: rgba(0, 0, 0, 0.6);
+    /* DARK MODE (Primary: #e8e8e8) */
+    --blue: #121212;
+    /* Background gelap pekat */
+    --text: #e8e8e8;
+    /* Teks utama terang */
+    --pink: #e8e8e8;
+    /* Warna utama mode gelap */
+    --accent: #bdbdbd;
+    /* Aksen abu-abu terang */
+    --dark: #ffffff;
+    --bg-gradient: radial-gradient(circle at top left, #1e1e1e, #121212);
+    --card-bg: rgba(232, 232, 232, 0.1);
+    --border-color: rgba(232, 232, 232, 0.2);
+    --shadow-color: rgba(0, 0, 0, 0.5);
 }
 
 body {
@@ -87,7 +105,7 @@ body {
     animation: slideInUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
 }
 
-/* ===== START SCREEN ===== */
+
 #startScreen {
     display: flex;
     flex-direction: column;
@@ -107,7 +125,7 @@ body {
 }
 
 
-/* Container Utama Tutorial */
+
 .tutorial-wrapper {
     position: relative;
     display: flex;
@@ -119,7 +137,7 @@ body {
     padding: 20px;
 }
 
-/* Grid System untuk 5 Kotak */
+
 .tutorial-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
@@ -128,7 +146,7 @@ body {
     margin-bottom: 50px;
 }
 
-/* Styling Tiap Kotak */
+
 .tutorial-card {
     background: var(--card-bg);
     border-radius: 20px;
@@ -150,7 +168,7 @@ body {
     padding-top: 40px;
 }
 
-/* Modifikasi untuk Setup Screen (Kiri & Kanan) */
+
 .tutorial-navigation.between {
     justify-content: space-between;
 }
@@ -181,7 +199,7 @@ body {
     text-align: center;
 }
 
-/* Memastikan Wrapper Setup bisa mendorong navbar ke bawah */
+
 .setup-wrapper {
     position: relative;
     display: flex;
@@ -206,7 +224,7 @@ body {
     transition: all 0.3s ease;
 }
 
-/* Tempat Gambar Tutorial */
+
 .card-img {
     width: 100%;
     aspect-ratio: 1 / 1;
@@ -241,8 +259,8 @@ body {
     line-height: 1.4;
 }
 
-/*slider switch*/
-/* From Uiverse.io by andrew-demchenk0 */
+
+
 .theme-switch {
     display: flex;
     align-items: center;
@@ -328,7 +346,7 @@ body {
     color: var(--input-focus);
 }
 
-/* Responsif: Jika layar kecil (HP), jadi 2 atau 3 kolom saja */
+
 @media (max-width: 900px) {
     .tutorial-grid {
         grid-template-columns: repeat(3, 1fr);
@@ -341,11 +359,11 @@ body {
     }
 }
 
-/*setupscreen*/
+
 .setup-content-split {
     display: grid;
     grid-template-columns: 1fr 1.5fr;
-    /* Kiri agak sempit, Kanan lebih lebar */
+
     gap: 40px;
     width: 100%;
 }
@@ -365,7 +383,7 @@ body {
     margin-bottom: 10px;
 }
 
-/* Timer: Susun Vertikal */
+
 .timer-vertical-grid {
     display: flex;
     flex-direction: column;
@@ -374,7 +392,7 @@ body {
 
 .timer-vertical-grid .selection-card {
     flex-direction: row;
-    /* Icon dan teks sejajar horizontal */
+
     justify-content: flex-start;
     padding: 15px 25px;
     gap: 20px;
@@ -391,7 +409,7 @@ body {
     opacity: 0.5;
 }
 
-/* Frame: Susun Grid 3 Kolom */
+
 .frame-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -416,7 +434,7 @@ body {
     transform: scale(1.02);
 }
 
-/* Preview Strip Simpel */
+
 .strip-mini {
     width: 30px;
     min-height: 20px;
@@ -475,7 +493,7 @@ body {
 
 .grid-area span {
     background: var(--text);
-    /* Di dark mode berubah jadi --dark (hijau) */
+
     border: 0.5px solid rgba(0, 0, 0, 0.1);
     display: block;
     width: 100%;
@@ -485,12 +503,12 @@ body {
     width: 100%;
     height: 12px;
     background: #00000000;
-    /* Blackbox biasanya tetap hitam */
+
     margin-top: auto;
     border-radius: 1px;
 }
 
-/* Tambahan agar di Dark Mode grid lebih tegas */
+
 body.dark-theme .grid-area span {
     background: white;
     border: 0.5px solid rgba(255, 255, 255, 0.2);
@@ -506,7 +524,7 @@ body.dark-theme .grid-area span {
     font-size: 14px;
     letter-spacing: 2px;
     border-radius: 8px;
-    /* Mengikuti style editor step Anda */
+
     background: var(--accent);
     color: white;
     border: none;
@@ -531,7 +549,7 @@ body.dark-theme .grid-area span {
     cursor: not-allowed;
 }
 
-/* Responsif: Di layar kecil, tombol bisa di tengah jika diinginkan */
+
 @media (max-width: 600px) {
     .tutorial-navigation {
         justify-content: center;
@@ -545,7 +563,7 @@ body.dark-theme .grid-area span {
     max-width: 1100px;
     min-height: 80vh;
     ;
-    /* Memberi ruang agar navigasi di bawah */
+
     margin: 0 auto;
     padding: 40px 20px;
 }
@@ -589,18 +607,18 @@ body.dark-theme .grid-area span {
     background: white;
 }
 
-/* Navigasi Kiri & Kanan Bawah */
+
 .setup-navigation {
     display: flex;
     justify-content: space-between;
-    /* Memisah ke kiri dan kanan */
+
     width: 100%;
     margin-top: auto;
-    /* Mendorong container ke dasar wrapper */
+
     padding-top: 40px;
 }
 
-/* Class tombol kamu tetap sama */
+
 .start-btn {
     padding: 12px 40px;
     font-size: 14px;
@@ -669,38 +687,46 @@ body.dark-theme .grid-area span {
     letter-spacing: 4px;
 }
 
-/* ===== BOOTH SCREEN (LANDSCAPE) ===== */
+
 #boothScreen {
-    display: grid;
-    grid-template-columns: 1.2fr 0.8fr;
-    background: var(--bg-gradient);
-    text-align: center;
-    gap: 40px;
-    padding: 40px;
+    display: flex;
     flex-direction: column;
-    justify-content: center;
+    height: 100vh;
+    width: 100vw;
     background: var(--bg-gradient);
+    overflow: hidden;
+    padding: 0;
 }
 
 #boothScreen.active {
-    display: grid;
+    display: flex;
 }
 
-/* ===== CAMERA AREA ===== */
-.booth {
-    position: relative;
-    width: 820px;
-    height: 525px;
-    border-radius: 24px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
-    flex-shrink: 0;
-    border: 8px solid white;
-}
 
 .booth-wrap {
-    display: contents;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas: "main sidebar";
+    gap: 3vw;
+    padding: 32px;
+    flex-grow: 1;
+    align-items: start;
+    justify-content: start;
+}
+
+.booth {
+    grid-area: main;
+    position: relative;
+    height: calc(100vh - 200px);
+    aspect-ratio: 16 / 12;
+    border: 8px solid white;
+    border-radius: 20px;
+    background: #000;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+
+
+    margin: 0;
 }
 
 .booth.landscape {
@@ -712,7 +738,7 @@ body.dark-theme .grid-area span {
     -webkit-transform: scaleX(-1) !important;
 }
 
-/* Styling tombol (opsional agar terlihat) */
+
 #mirrorBtn {
     position: absolute;
     top: 10px;
@@ -738,14 +764,13 @@ canvas {
     font-size: 10px;
     color: #666;
     display: flex;
-    position: fixed;
+    align-items: flex-end;
     justify-content: flex-end;
-    margin: 20px;
 }
 
-/* ===== CONTROLS PANEL ===== */
 
-/* ===== COUNTDOWN ===== */
+
+
 #countdown {
     position: absolute;
     inset: 0;
@@ -781,7 +806,7 @@ canvas {
     }
 }
 
-/* ===== FLASH SHUTTER ===== */
+
 #flash {
     position: absolute;
     inset: 0;
@@ -809,7 +834,7 @@ canvas {
     }
 }
 
-/* ===== RESULT SCREEN ===== */
+
 #resultScreen {
     padding: 0;
     background: var(--bg-gradient);
@@ -883,7 +908,7 @@ canvas {
 
 .support-text a {
     color: #d4a373;
-    /* Warna senada dengan aksen kamu */
+
     text-decoration: none;
     font-weight: 700;
     margin-left: 5px;
@@ -895,7 +920,7 @@ canvas {
     text-decoration: underline;
 }
 
-/* Responsif: Jika di layar kecil, sembunyikan atau pindahkan */
+
 @media (max-width: 600px) {
     .support-text {
         font-size: 11px;
@@ -932,35 +957,48 @@ canvas {
     transform: translateX(-50%) scale(0.92);
 }
 
+
+
+.preview-area {
+    grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 200px);
+    width: 100%;
+    max-width: 400px;
+    aspect-ratio: 1/2;
+}
+
 .preview-strip {
-    width: auto;
-    border-radius: 12px;
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-    padding: 40px;
+    grid-template-rows: repeat(3, 1fr);
+    gap: 15px;
+
+    height: 100%;
+
+    width: fit-content;
+
 }
 
 
 .preview-strip div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: relative;
+    height: 100%;
+
+    width: auto;
+
+    aspect-ratio: 2 / 3;
+
+    border-radius: 12px;
+    overflow: hidden;
 }
 
 .preview-strip img {
-    width: 180px;
-    height: 140px;
-    /* 4:3 */
-    object-fit: contain;
-    cursor: pointer;
-    transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.1);
-}
-
-.preview-strip img:hover {
-    transform: scale(1.1) rotate(3deg);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    display: block;
 }
 
 .preview-strip button {
@@ -979,7 +1017,7 @@ canvas {
     outline: 3px solid var(--accent);
 }
 
-/* Layout & Tab Bar */
+
 .booth-container {
     display: flex;
     flex-direction: column;
@@ -1062,7 +1100,7 @@ canvas {
 }
 
 .coffee-btn {
-    /* Jika Anda tetap pakai tag <button>, kita buat dia transparan */
+
     background: none !important;
     color: var(--text) !important;
     border: none !important;
@@ -1071,7 +1109,7 @@ canvas {
     opacity: 0.6;
 }
 
-/* Modal System */
+
 .modal {
     display: none;
     position: fixed;
@@ -1119,16 +1157,14 @@ canvas {
 
 .booth-navigation {
     display: flex;
-    justify-content: flex-end;
-    /* Memindah tombol ke kanan */
+    justify-content: space-between;
+
     align-items: center;
     width: 100%;
-    margin-top: auto;
-    /* Mendorong container ini ke paling bawah */
-    padding-top: 40px;
+
 }
 
-/* Modifikasi untuk Setup Screen (Kiri & Kanan) */
+
 .booth-navigation.between {
     justify-content: space-around;
     gap: 282px;
@@ -1136,37 +1172,30 @@ canvas {
     bottom: 90px;
     left: 0;
     right: 0;
-    /* Tombol 1 ke Kiri, Tombol 2 ke Kanan */
+
 }
 
 .pre-btn-booth {
     display: flex;
     justify-content: flex-start;
-    /* Default: Pojok Kanan */
+
     align-items: center;
 }
 
 .next-btn-both {
     display: flex;
     justify-content: flex-end;
-    /* Default: Pojok Kanan */
+
     align-items: center;
 }
 
-/* State ketika tombol belum bisa diklik (foto belum lengkap) */
+
 
 .button-two {
     display: flex;
     justify-content: center;
     width: 100%;
     gap: 20px;
-}
-
-.span-tek {
-    font-size: 10px;
-    color: #666;
-    display: flex;
-    justify-content: flex-end;
 }
 
 .preview-actions {
@@ -1210,7 +1239,7 @@ canvas {
     display: inline-block;
 }
 
-/* Efek saat tombol di-hover */
+
 .button-one button:hover:not(:disabled),
 .button-two button:hover {
     filter: brightness(1.1);
@@ -1221,14 +1250,13 @@ canvas {
     filter: brightness(0.7);
 }
 
-/* Gaya khusus untuk tombol yang sedang disabled (seperti tombol proses) */
+
 button:disabled {
     background: #ccc;
     cursor: not-allowed;
     transform: none;
 }
 
-/* Layout Hasil: Kiri Foto, Kanan Settings */
 .result-left {
     max-width: 1200px;
     min-height: 600px;
@@ -1243,7 +1271,7 @@ button:disabled {
 
 .result-right {
     flex: 0.8;
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--card-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     border-left: 1px solid rgba(255, 255, 255, 0.3);
@@ -1280,12 +1308,12 @@ button:disabled {
 }
 
 
-/* Sembunyikan tab-bar-dua jika sudah dipindah ke kanan */
+
 .tab-bar-dua {
     display: none;
 }
 
-/* Responsif untuk Mobile */
+
 @media (max-width: 900px) {
     .result-container {
         grid-template-columns: 1fr;
@@ -1295,21 +1323,24 @@ button:disabled {
 
 .delete-btn {
     position: absolute;
-    top: -5px;
-    right: -5px;
+    top: 10px;
+
+    left: 10px;
+
+    width: 26px;
+    height: 26px;
     background: #ff4d4d;
     color: white;
-    border: none;
+    border: 2px solid white;
     border-radius: 50%;
-    width: 25px;
-    height: 25px;
-    cursor: pointer;
-    font-weight: bold;
     display: flex;
     align-items: center;
     justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
     z-index: 10;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 .delete-btn:hover {
@@ -1319,35 +1350,37 @@ button:disabled {
 .texture-gallery {
     display: flex;
     flex-direction: row;
-    /* Berjejer ke samping */
+
     gap: 15px;
     overflow-x: auto;
-    /* Slide horizontal */
+
     padding: 15px 5px;
     width: 100%;
     scrollbar-width: thin;
-    /* Untuk Firefox */
+
     scrollbar-color: var(--accent) transparent;
+
 }
 
-/* Thumbnail Bulat */
+
 .texture-gallery::-webkit-scrollbar {
+    object-fit: cover;
     height: 6px;
 }
 
 .texture-gallery::-webkit-scrollbar-thumb {
     background: var(--accent);
+    object-fit: cover;
     border-radius: 10px;
 }
 
 .texture-item {
-    flex: 0 0 50px;
-    /* Ukuran tetap agar tidak gepeng saat di-slide */
-    height: 50px;
-    border-radius: 50px;
-    border: 3px solid transparent;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-size: cover;
+
     cursor: pointer;
-    transition: all 0.3s ease;
 }
 
 .footer-actions {
@@ -1365,14 +1398,11 @@ button:disabled {
 @media (max-width: 1024px) {
     .result-container.editor-active .result-left {
         transform: scale(0.8) translateX(-100px);
-        /* Geser & kecilkan saat edit */
         opacity: 0.3;
-        /* Menutup sedikit agar fokus ke kanan */
         pointer-events: none;
     }
 }
 
-/* Tombol Hapus Background */
 .delete-btn-bg {
     background: #ff4d4d;
     color: white;
@@ -1422,20 +1452,23 @@ button:disabled {
 }
 
 .result-right {
-    background: rgba(255, 255, 255, 0.7);
+    background: var(--card-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     padding: 25px;
     border-radius: 20px;
-    backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     min-height: 520px;
-    /* Tinggi konsisten agar tidak goyang saat ganti slide */
     position: relative;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 
-/* ================= MULTI-STEP EDITOR (SLIDES) ================= */
+body.dark-theme .result-right {
+    background: rgba(18, 18, 18, 0.85); 
+    border-left: 1px solid rgba(232, 232, 232, 0.1);
+}
 
 .editor-step {
     display: none;
@@ -1469,18 +1502,18 @@ button:disabled {
     color: var(--dark);
 }
 
-/* ================= NAVIGATION BUTTONS ================= */
+
 
 .step-navigation {
     margin-top: auto;
-    /* Mendorong tombol ke bawah box */
+
     display: flex;
     justify-content: space-between;
     padding-top: 20px;
     border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
-/* Tombol Next & Previous di kanan bawah */
+
 .nav-controls {
     display: flex;
     gap: 10px;
@@ -1519,7 +1552,7 @@ button:disabled {
     padding: 10px;
 }
 
-/* ================= FINAL ACTIONS (STEP TERAKHIR) ================= */
+
 
 #finalActions {
     display: none;
@@ -1546,11 +1579,8 @@ button:disabled {
 
 #frameTemplateGallery .texture-item {
     width: 50px;
-    /* Lebih lebar sedikit untuk frame */
     height: 75px;
-    /* Lebih tinggi untuk frame */
     border-radius: 4px;
-    /* Kotak, bukan bulat */
     background-color: #fff;
     border: 1px solid #ddd;
 }
@@ -1559,92 +1589,95 @@ button:disabled {
     border: 2px solid var(--accent);
 }
 
-/*MEDIAAAAAAAAAAAAA QUErYYYYYYYYYYYYY*/
+/*media query*/
 
-/* ============================================================
-   FIX KHUSUS BOOTH SCREEN (Anti-Terpotong & Responsif)
-   ============================================================ */
-
-/* 1. LAPTOP DI BAWAH 14 INCH (1025px - 1359px) */
-@media (max-width: 1359px) and (min-width: 1025px) {
-    #boothScreen {
+@media screen and (max-width: 1376px) {
+    .booth-wrap {
         display: grid;
-        grid-template-columns: 1fr 300px; /* Perkecil area preview */
-        gap: 30px;
-        padding: 20px;
-        height: 100vh;
-        box-sizing: border-box;
+        grid-template-columns: auto 1fr;
+
+        grid-template-areas: "main sidebar";
+        gap: 2vw;
+        padding: 2vh 4vw;
+        align-items: start;
+        justify-content: start;
     }
 
     .booth {
+        grid-area: main;
+        width: 63vw;
+        max-width: 900px;
+        aspect-ratio: 16 / 12;
+        height: auto;
+        max-height: calc(100vh - 180px);
+        border: 0.6vw solid white;
+        border-radius: 20px;
+    }
+
+    .preview-area {
+        grid-area: sidebar;
         width: 100%;
         height: auto;
-        max-height: 550px; /* Kunci tinggi agar tidak menabrak bottom layar */
-        border-width: 6px;
+        aspect-ratio: 1/2;
+        max-height: calc(100vh - 180px);
     }
 
     .preview-strip {
+        display: grid;
         grid-template-columns: repeat(2, 1fr);
-        gap: 24px;
-        align-items: center;
-        max-height: 80vh;
-        overflow-y: auto;
-    }
-
-    .preview-strip img {
-        width: 100%; /* Fluid di dalam grid preview */
-        height: auto;
+        grid-template-rows: repeat(3, 1fr);
+        gap: 1.5vh;
+        height: 100%;
     }
 }
 
-/* 2. IPAD & TABLET (768px - 1024px) */
-@media (max-width: 1024px) {
-    #boothScreen {
-        display: flex;
-        flex-direction: column; /* Tumpuk ke bawah agar kamera tetap lebar */
-        justify-content: flex-start;
-        align-items: center;
-        padding: 15px;
-        height: 100vh;
-        overflow-y: auto; /* Izinkan scroll jika preview banyak */
+
+@media screen and (max-width: 1024px) and (orientation: landscape) {
+    .booth {
+        width: 50vw;
+
+        border-width: 5px;
     }
 
-    .booth {
-        width: 100vw;
-        max-width: 650px;
-        height: auto;
-        margin-bottom: 20px;
-        flex-shrink: 0; /* Mencegah kamera mengecil jadi gepeng */
+    .preview-area {
+        max-width: 300px;
+
     }
 
     .preview-strip {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr); /* 3 kolom di iPad */
+        gap: 10px;
+    }
+}
+
+
+@media screen and (max-width: 1024px) and (orientation: portrait) {
+    .booth-wrap {
+        grid-template-columns: 1fr;
+
+        grid-template-areas: "main" "sidebar";
+        justify-items: start;
+
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    .booth {
+        width: 90vw;
+
+        height: auto;
+        aspect-ratio: 16 / 12;
+        margin-bottom: 20px;
+    }
+
+    .preview-area {
+        width: 85vw;
+        height: auto;
+    }
+
+    .preview-strip {
+
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
         gap: 15px;
-        width: 100%;
-        max-width: 750px;
-        padding-bottom: 40px; /* Ruang agar tidak tertutup tombol navigasi */
-    }
-
-    /* Logic Teks Preview (iPad): Di atas foto, tidak menimpa */
-    .preview-strip div {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-
-    .preview-strip span {
-        position: static;
-        background: none;
-        color: var(--text);
-        font-weight: 700;
-        font-size: 12px;
-        padding: 0;
-    }
-
-    .preview-strip img {
-        width: 100%;
-        height: 100%;
-        border-radius: 8px;
     }
 }
