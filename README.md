@@ -17,7 +17,7 @@ A minimalist web-based photobooth application designed specifically for PC and i
 
 | Section | Features |
 | :--- | :--- |
-| **Shots** | Custom Timer, Set Photo Count (3, 4, or 6 shots). |
+| **Shots** | Custom Timer, Set Photo Count (1,2,3, 4, or 6 shots). |
 | **Filters** | Pro-grade filters: Instax, Nordic, Midnight, Cyber, Vintage, and more. |
 | **Background** | Solid Colors, Store-branded Colors, or Upload Custom Images. |
 | **Aesthetics** | Set Emojis, Custom Text, Auto/Custom Date, and Textures. |
