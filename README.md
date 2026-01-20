@@ -1,14 +1,17 @@
-Simple Photobooth Website Build using html, css, and js (only pc and ipad potrait i'll fix soon )
+Simple Photobooth Website Build using html, css, and js (only pc and ipad scale)
 
-Beta version 0.2
+**Beta version 0.3**
 
-Add New UI ( Beta ), Layout
+**New Update:**
+-Add Camera input select
+-Fix Minor bug
+-Delete useless animation (i'll add some light animation)
+-Fix Navigation Button
 
-Feature: 
+**Feature:**
 Shot: Timer, Set Count Foto
 
-Customization:
-
+**Customization:**
 Set Background and Border Color, Filter Photo ,Set Emoji Text and Date, Set Texture, Upload Custom Background, Frame Photo (On Progress)
 
 Other Features will be update soon 
