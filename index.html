@@ -27,7 +27,7 @@
         <h1>Zahra's Photobooth</h1>
         <p class="subtitle">Pure moments, captured.</p>
         <button class="start-btn" onclick="showScreen('tutorialScreen')">START</button>
-        <p class="version">Beta V 0.2</p>
+        <p class="version">Beta v0.3</p>
         <p class="credit">Build and design by <br>Kukuh G</p>
     </section>
 
@@ -56,10 +56,6 @@
                     <div class="card-img">5</div>
                     <p>Tekan Download dan selamat mencoba❤️</p>
                 </div>
-            </div>
-
-            <div class="tutorial-navigation">
-                <button id="btnStartBooth" class="nav-btn" onclick="showScreen('setupScreen')">NEXT</button>
             </div>
         </div>
     </section>
@@ -150,17 +146,17 @@
                     </div>
                 </div>
             </div>
-
-            <div class="tutorial-navigation between">
-                <button class="pre-btn" onclick="showScreen('tutorialScreen')">PREVIOUS</button>
-                <button class="next-btn" onclick="confirmSetup()">NEXT</button>
-            </div>
         </div>
     </section>
 
-    <section id="boothScreen" class="screen active">
+    <section id="boothScreen" class="screen">
         <div class="booth-wrap">
             <div class="booth landscape">
+                <div class="camera-controls-top">
+                    <select id="cameraSelect" class="camera-dropdown-mini">
+                        <option value="">Detecting Cameras...</option>
+                    </select>
+                </div>
                 <div id="countdown"></div>
                 <div id="flash"></div>
                 <video id="video" autoplay playsinline></video>
@@ -169,21 +165,12 @@
                 <button id="mirrorBtn" title="Mirror Camera">⟲</button>
             </div>
             <div class="preview-area">
-                <span class="span-tek ">Klik foto untuk retake ulang foto 
+                <span class="span-tek ">Klik foto untuk retake ulang foto
                 </span>
                 <div id="previewStrip" class="preview-strip">
                 </div>
             </div>
-            
-        </div>
-        <div class="booth-navigation between">
-            <button id="prevToTutorial" class="pre-btn-booth" onclick="showScreen('setupScreen')">
-                PREVIOUS
-            </button>
 
-            <button id="process" class="next-btn-booth" disabled>
-                NEXT
-            </button>
         </div>
     </section>
 
@@ -210,6 +197,16 @@
                             <option value="country">Country</option>
                             <option value="dv">Digital Video</option>
                             <option value="instax">Instax</option>
+                            <option value="nordic">Nordic Blue</option>
+                            <option value="midnight">Midnight</option>
+                            <option value="cyber">Cyberpunk</option>
+                            <option value="faded">Faded</option>
+                            <option value="candy">Candy</option>
+                            <option value="noir">Deep Noir</option>
+                            <option value="golden">Golden Hour</option>
+                            <option value="ocean">Oceanic</option>
+                            <option value="retro">Retro Pop</option>
+                            <option value="bloom">Bloom Glow</option>
                         </select>
                         <label>Warna Frame</label>
                         <input type="color" id="frameColorEditor" value="#ffffff" oninput="updateLiveSettings()">
@@ -284,92 +281,12 @@
 
             <div class="button-two footer-actions" id="finalActions">
                 <button id="download">Download</button>
-                <button id="reset" onclick="location.reload()">Take Again</button>
-                <button class="coffee-btn">Buy a Coffee</button>
+                <button id="reset" onclick="resetBooth()">Take Again</button>
             </div>
     </section>
-
-    <!-- ================= MODALS ================= -->
-
-    <div id="modal-shot" class="modal">
-        <div class="modal-content">
-            <label>Timer</label>
-            <select id="timer">
-                <option value="3">3s</option>
-                <option value="5">5s</option>
-                <option value="10">10s</option>
-            </select>
-
-            <label>Jumlah Foto</label>
-            <select id="count">
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-                <option value="6">6</option>
-            </select>
-
-            <button id="saveShot">Simpan</button>
-        </div>
-    </div>
-
-    <div id="modal-style" class="modal">
-        <div class="modal-content">
-            <label>Filter</label>
-            <select id="filter">
-                <option value="normal">Normal</option>
-                <option value="bw">B&W</option>
-                <option value="vintage">Vintage</option>
-                <option value="soft">Soft</option>
-                <option value="country">Country</option>
-                <option value="dv">DV Cam</option>
-                <option value="instax">Instax</option>
-            </select>
-            <span>============================</span>
-            <span style="font-size: 10px; color: red;">*Pilih salah satu</span>
-            <label>Custom Template Frame</label>
-            <select id="frameTemplate">
-                <option value="">-</option>
-                <option value="6-kz.png">Template Birthday (6 Foto)</option>
-            </select>
-            <label>Warna Frame</label>
-            <input type="color" id="frameColor" value="#ffffff">
-
-            <label>Atau Custom Background (Image)</label>
-            <input type="file" id="bgUpload" accept="image/*">
-            <p style="font-size: 10px; color: #666;">*Kosongkan jika ingin menggunakan warna/template di atas</p>
-
-            <button id="saveStyle">Simpan</button>
-        </div>
-    </div>
-
-    <div id="modal-text" class="modal">
-        <div class="modal-content">
-            <label>Teks Utama</label>
-            <input id="textPrimary">
-
-            <label>Teks Kedua</label>
-            <input id="textSecondary">
-
-            <label>Emoji</label>
-            <select id="emojiSelect">
-                <option value="">-</option>
-                <option>✨</option>
-                <option>❤️</option>
-                <option>🌸</option>
-            </select>
-
-            <label>Tanggal</label>
-            <select id="dateMode">
-                <option value="auto">Otomatis</option>
-                <option value="custom">Custom</option>
-                <option value="without">-</option>
-            </select>
-
-            <input type="date" id="customDateEditor" style="display:none" oninput="updateLiveSettings()"
-                onkeydown="return false">
-            <button id="saveText">Simpan</button>
-        </div>
+    <div id="mainNavigation" class="global-nav" style="display: none;">
+        <button id="prevBtn" class="nav-btn" onclick="goBack()">PREVIOUS</button>
+        <button id="globalNext" class="nav-btn" onclick="goNext()">NEXT</button>
     </div>
 
     <script>feather.replace()</script>
