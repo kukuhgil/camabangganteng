@@ -8,8 +8,10 @@ A high-quality web-based photobooth specifically designed and optimized for Desk
 ### ✨ What's New in V 0.4?
 - **📤 Photo Upload Support:** Tidak terbatas pada kamera, sekarang kamu bisa mengunggah foto langsung dari perangkat untuk diproses ke dalam layout photobooth.
 - **🎞️ Live Mode Toggle:** Pratinjau efek, filter, dan elemen estetika secara real-time langsung di canvas sebelum memotret.
-- **🔄 Smart Reset Button:** Kembalikan semua konfigurasi (timer, shot, filter) ke pengaturan awal secara instan tanpa memuat ulang halaman.
-- **🎨 Boothscreen Relayout:** Penataan ulang antarmuka di Boothscreen yang mengintegrasikan filter langsung dengan canvas untuk alur kerja yang lebih intuitif.
+- **🔁 Mirror Mode:** Fitur baru untuk membalikkan tampilan kamera (flip horizontal) agar hasil foto sesuai dengan preferensi kamu.
+- **🗑 Smart Reset Photo:** Tombol reset baru di area kamera untuk menghapus jepretan atau reset konfigurasi canvas secara instan tanpa memuat ulang halaman.
+- **🎨 Camera Relayout:** Penataan ulang antarmuka di Camera yang mengintegrasikan filter langsung dengan canvas untuk alur kerja yang lebih intuitif.
+- **🌙 Dark Mode Optimization:** Peningkatan kontras dan palet warna pada mode gelap untuk kenyamanan mata dan tampilan yang lebih premium.
 - **🛠️ Bug Fixes:** Optimalisasi performa Canvas API dan perbaikan minor pada sistem navigasi.
 
 ---
@@ -18,18 +20,18 @@ A high-quality web-based photobooth specifically designed and optimized for Desk
 
 | Section | Features |
 | :--- | :--- |
-| **Input Source** | Live Camera selection (DroidCam/Webcam) & **New: Image Upload Support**. |
-| **Live Editing** | **New: Live Mode** untuk melihat perubahan filter dan frame secara instan di canvas. |
+| **Input Source** | Live Camera selection & **New: Image Upload Support**. |
+| **Camera Tools** | **Mirror Mode**, **Live Mode**, & **Quick Reset Button**. |
 | **Shots** | Custom Timer, Set Photo Count (1, 2, 3, 4, or 6 shots). |
 | **Filters** | Pro-grade filters: Instax, Nordic, Midnight, Cyber, Vintage, and more. |
-| **Background** | Solid Colors, Store-branded Colors, or Upload Custom Backgrounds. |
-| **Aesthetics** | Set Emojis, Custom Text, Auto/Custom Date, and Textures. |
+| **Theming** | **Optimized Dark Mode** & Clean Light Mode. |
+| **Aesthetics** | Set Emojis, Custom Text, Auto/Custom Date, Texture, and Frame Templates. |
 
 ---
 
 ### 🎨 Design & Customization
 - **Fonts:** *Fraunces* untuk kesan elegan & *Jost* untuk keterbacaan modern.
-- **Theming:** Dukungan penuh untuk Light dan Dark mode.
+- **Visuals:** UI yang bersih dengan transisi halus antara Light dan Dark mode.
 - **Canvas Engine:** Pemrosesan gambar real-time menggunakan Vanilla JavaScript Canvas API.
 
 ---
@@ -44,7 +46,7 @@ A high-quality web-based photobooth specifically designed and optimized for Desk
 ### 📱 Device Scale
 - ✅ **PC / Desktop** (Recommended: 1920x1080)
 - ✅ **iPad / Tablet** (Landscape Optimized)
-- ❌ **Mobile** (Not Supported)
+- ❌ **Mobile** (Coming Soon)
 
 ---
 
