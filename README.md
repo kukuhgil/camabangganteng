@@ -7,10 +7,10 @@ A high-quality web-based photobooth specifically designed and optimized for Desk
 
 ### ✨ What's New in V 0.4?
 - **📤 Photo Upload Support:** Tidak terbatas pada kamera, sekarang kamu bisa mengunggah foto langsung dari perangkat untuk diproses ke dalam layout photobooth.
-- **🎞️ Live Mode Toggle:** Pratinjau efek, filter, dan elemen estetika secara real-time langsung di canvas sebelum memotret.
-- **🔁 Mirror Mode:** Fitur baru untuk membalikkan tampilan kamera (flip horizontal) agar hasil foto sesuai dengan preferensi kamu.
-- **🗑 Smart Reset Photo:** Tombol reset baru di area kamera untuk menghapus jepretan atau reset konfigurasi canvas secara instan tanpa memuat ulang halaman.
-- **🎨 Camera Relayout:** Penataan ulang antarmuka di Camera yang mengintegrasikan filter langsung dengan canvas untuk alur kerja yang lebih intuitif.
+- **🎞️ Dedicated Live Mode:** Percantik kameramu secara real-time langsung di atas canvas sebelum memotret.
+- **🔁 Mirror Mode:** Fitur baru untuk membalikkan tampilan kamera (flip horizontal) agar hasil posisi foto sesuai dengan keinginanmu.
+- **🗑️ Smart Reset Photo:** Tombol reset baru di area kamera untuk menghapus jepretan atau mengosongkan canvas secara instan tanpa memuat ulang halaman.
+- **🎨 Camera Relayout:** Penataan ulang antarmuka kamera yang kini mengintegrasikan filter secara horizontal agar kamu bisa melihat perubahan efek warna langsung di canvas.
 - **🌙 Dark Mode Optimization:** Peningkatan kontras dan palet warna pada mode gelap untuk kenyamanan mata dan tampilan yang lebih premium.
 - **🛠️ Bug Fixes:** Optimalisasi performa Canvas API dan perbaikan minor pada sistem navigasi.
 
@@ -21,9 +21,9 @@ A high-quality web-based photobooth specifically designed and optimized for Desk
 | Section | Features |
 | :--- | :--- |
 | **Input Source** | Live Camera selection & **New: Image Upload Support**. |
-| **Camera Tools** | **Mirror Mode**, **Live Mode**, & **Quick Reset Button**. |
+| **Camera Tools** | **Live Mode Toggle**, **Mirror Mode**, & **Quick Reset Button**. |
 | **Shots** | Custom Timer, Set Photo Count (1, 2, 3, 4, or 6 shots). |
-| **Filters** | Pro-grade filters: Instax, Nordic, Midnight, Cyber, Vintage, and more. |
+| **Filters** | Pro-grade color filters: Instax, Nordic, Midnight, Cyber, Vintage, and more. |
 | **Theming** | **Optimized Dark Mode** & Clean Light Mode. |
 | **Aesthetics** | Set Emojis, Custom Text, Auto/Custom Date, Texture, and Frame Templates. |
 
