@@ -1,9 +1,9 @@
-/* ================= CONFIGURATION ================= */
+
 const FILTERS = {
     normal: 'contrast(1.05) brightness(1.02) saturate(1.1)',
     bw: 'grayscale(1) contrast(1.4) brightness(0.95)',
     vintage: 'sepia(0.5) contrast(0.9) brightness(1.05) hue-rotate(-10deg)',
-    soft: 'brightness(1.15) saturate(1.1) contrast(0.9) blur(0.4px)',
+    soft: 'brightness(1.15) saturate(1.1) contrast(0.9)',
     country: 'sepia(0.3) saturate(1.4) contrast(1.05) brightness(0.95)',
     dv: 'contrast(1.5) saturate(0.4) brightness(1.1) hue-rotate(20deg)',
     instax: 'contrast(1.25) saturate(1.6) brightness(1.05) hue-rotate(5deg)',
@@ -16,7 +16,7 @@ const FILTERS = {
     golden: 'sepia(0.45) saturate(1.7) contrast(1) brightness(1.1) hue-rotate(-20deg)',
     ocean: 'hue-rotate(160deg) saturate(0.8) contrast(1.1) brightness(1.05)',
     retro: 'sepia(0.2) contrast(1.3) brightness(1) saturate(1.5) hue-rotate(-10deg)',
-    bloom: 'brightness(1.2) saturate(1.2) contrast(0.9) blur(0.6px)',
+    bloom: 'brightness(1.2) saturate(1.2) contrast(0.9)',
     glitch: 'contrast(1.5) saturate(2) hue-rotate(90deg) opacity(0.8)'
 };
 
@@ -33,26 +33,17 @@ const USER_SETTINGS = {
     emoji: '',
     dateModeEditor: 'auto',
     customDate: '',
-    frameID: 'null',
-    useTemplate: true
+    frameID: null
 };
 
-const TEXTURE_PATH = 'texture/'
-const FRAME_PATH = 'frame/'
-const TEXTURES = [
-    '1.png',
-    '2.png',
-    '3.png',
-    '4.png',
-    '5.png',
-    '6.png',
-    '7.png',
-];
+const TEXTURE_PATH = 'texture/';
+const FRAME_PATH = 'frame/';
+const TEXTURES = ['1.png', '2.png', '3.png', '4.png', '5.png', '6.png', '7.png'];
 
-const EMOJI_LIST = ['❤️', '✨', '⭐', '👑', '🎀', '🍀', '🔥', '🌈', '😎', '📸', '🥳', '🌸', '🦄', '🐾', '🦋', '💎', '☁️', '🧸'];
 const appFlow = ['startScreen', 'tutorialScreen', 'setupScreen', 'boothScreen', 'resultScreen'];
 let currentFlowIndex = 0;
-/* ================= STATE ================= */
+
+
 let shots = [];
 let maxShots = 2;
 let currentShot = 0;
@@ -61,18 +52,107 @@ let isCounting = false;
 let activeFilter = 'normal';
 let currentStep = 1;
 let isMirrored = true;
-let activeStickers = [];
-let selectedStickerIndex = null;
-let isDraggingSticker = false;
-let needsUpdate = false;
 let currentDeviceId = null;
-let dragOffsetX = 0, dragOffsetY = 0;
+
+
+const video = document.getElementById('video');
+const canvas = document.getElementById('canvas');
+const collage = document.getElementById('collage');
+const flash = document.getElementById('flash');
+const countdownEl = document.getElementById('countdown');
+const previewStrip = document.getElementById('previewStrip');
+const shutterBtn = document.getElementById('shutterBtn');
+const mirrorBtn = document.getElementById('mirrorBtn');
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    initCameraList();
+    initTextureGallery();
+    initFrameGallery();
+    setupEventListeners();
+
+    isMirrored = true;
+    if (video) {
+        video.classList.add('mirrored');
+    }
+});
+
+
+function setupEventListeners() {
+
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    if (darkModeToggle) {
+        darkModeToggle.addEventListener('change', () => {
+            document.body.classList.toggle('dark-theme', darkModeToggle.checked);
+        });
+    }
+
+    if (mirrorBtn) {
+
+        mirrorBtn.onclick = null;
+
+
+        mirrorBtn.addEventListener('click', function () {
+            video.classList.toggle('mirrored');
+            updateMirrorState();
+            console.log('Mirror mode toggled:', isMirrored ? 'ON' : 'OFF');
+        });
+    }
+
+
+    const manualUpload = document.getElementById('manualUpload');
+    if (manualUpload) {
+        manualUpload.addEventListener('change', handleManualUpload);
+    }
+
+
+    const nextStepBtn = document.getElementById('nextStep');
+    if (nextStepBtn) {
+        nextStepBtn.addEventListener('click', handleNextStep);
+    }
+
+    const prevStepBtn = document.getElementById('prevStep');
+    if (prevStepBtn) {
+        prevStepBtn.addEventListener('click', () => {
+            if (currentStep > 1) goToStep(currentStep - 1);
+        });
+    }
+
+
+    const downloadBtn = document.getElementById('download');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', handleDownload);
+    }
+
+
+    const dateModeSelect = document.getElementById('dateModeEditor');
+    if (dateModeSelect) {
+        dateModeSelect.addEventListener('change', handleDateModeChange);
+    }
+
+
+    const liveToggle = document.getElementById('liveToggle');
+    if (liveToggle) {
+        liveToggle.addEventListener('change', function () {
+            toggleLiveMode(this);
+        });
+    }
+
+
+    const cameraSelect = document.getElementById('cameraSelect');
+    if (cameraSelect) {
+        cameraSelect.addEventListener('change', async function () {
+            currentDeviceId = this.value;
+            if (document.getElementById('boothScreen').style.display !== 'none') {
+                await startVideo();
+            }
+        });
+    }
+}
 
 
 function initTextureGallery() {
     const gallery = document.getElementById('textureGallery');
-    const removeUploadBtn = document.getElementById('removeUploadBtn');
-    const removeTextureBtn = document.getElementById('removeTextureBtn');
     if (!gallery) return;
 
     gallery.innerHTML = '';
@@ -82,16 +162,18 @@ function initTextureGallery() {
         const fullPath = TEXTURE_PATH + file;
         div.style.backgroundImage = `url('${fullPath}')`;
 
-        if (USER_SETTINGS.bgImage === fullPath) div.classList.add('active');
+        if (USER_SETTINGS.bgImage === fullPath) {
+            div.classList.add('active');
+            document.getElementById('removeTextureBtn').style.display = 'flex';
+        }
 
         div.onclick = () => {
             USER_SETTINGS.bgImage = fullPath;
-
             document.querySelectorAll('.texture-item').forEach(el => el.classList.remove('active'));
             div.classList.add('active');
 
-            if (removeTextureBtn) removeTextureBtn.style.display = 'block';
-            if (removeUploadBtn) removeUploadBtn.style.display = 'none';
+            document.getElementById('removeTextureBtn').style.display = 'flex';
+            document.getElementById('removeUploadBtn').style.display = 'none';
 
             const uploadInput = document.getElementById('bgUploadEditor');
             if (uploadInput) uploadInput.value = '';
@@ -104,7 +186,6 @@ function initTextureGallery() {
 
 function initFrameGallery() {
     const gallery = document.getElementById('frameTemplateGallery');
-    const removeFrameBtn = document.getElementById('removeFrameBtn');
     if (!gallery) return;
 
     gallery.innerHTML = '';
@@ -113,26 +194,25 @@ function initFrameGallery() {
     frames.forEach(id => {
         const item = document.createElement('div');
         item.className = 'texture-item';
-
         const fullPath = `${FRAME_PATH}${maxShots}/${id}.png`;
 
         item.style.backgroundImage = `url('${fullPath}')`;
         item.style.backgroundSize = 'contain';
         item.style.backgroundRepeat = 'no-repeat';
         item.style.backgroundPosition = 'center';
-        item.style.borderRadius = '4px';
 
         if (USER_SETTINGS.frameID === id) {
             item.classList.add('active');
+            const removeFrameBtn = document.getElementById('removeFrameBtn');
             if (removeFrameBtn) removeFrameBtn.style.display = 'block';
         }
 
         item.onclick = () => {
             USER_SETTINGS.frameID = id;
-
             document.querySelectorAll('#frameTemplateGallery .texture-item').forEach(el => el.classList.remove('active'));
             item.classList.add('active');
 
+            const removeFrameBtn = document.getElementById('removeFrameBtn');
             if (removeFrameBtn) removeFrameBtn.style.display = 'block';
 
             makeCollage();
@@ -142,18 +222,8 @@ function initFrameGallery() {
     });
 }
 
-function removeFrameTemplate() {
-    USER_SETTINGS.frameID = null;
-    document.querySelectorAll('#frameTemplateGallery .texture-item').forEach(el => el.classList.remove('active'));
-
-    const removeFrameBtn = document.getElementById('removeFrameBtn');
-    if (removeFrameBtn) removeFrameBtn.style.display = 'none';
-
-    makeCollage();
-}
 
 function showScreen(screenId) {
-    // 1. Sembunyikan semua screen
     document.querySelectorAll('.screen').forEach(s => {
         s.style.display = 'none';
         s.classList.remove('active');
@@ -166,127 +236,60 @@ function showScreen(screenId) {
 
         currentFlowIndex = appFlow.indexOf(screenId);
 
-        // 2. LOGIKA NAVBAR SIMPEL (Hanya 3 Layar)
+
         const globalNav = document.getElementById('mainNavigation');
         if (globalNav) {
             const layarAktifNavbar = ['tutorialScreen', 'setupScreen', 'boothScreen'];
-
-            if (layarAktifNavbar.includes(screenId)) {
-                globalNav.style.display = 'flex';
-            } else {
-                globalNav.style.display = 'none';
-            }
+            globalNav.style.display = layarAktifNavbar.includes(screenId) ? 'flex' : 'none';
         }
 
-        if (screenId === 'boothScreen') startVideo();
+        if (screenId === 'boothScreen') {
+            renderBoothFilters();
+            startVideo();
+            updatePreview();
+        } else if (screenId === 'resultScreen') {
+            syncEditorInputs();
+            setTimeout(() => {
+                if (shots.length > 0) makeCollage();
+            }, 100);
+        }
     }
 }
-function updateGlobalNextStatus() {
+
+
+let selectedSettings = { timer: null, count: null };
+
+function updateSelection(type, value, element) {
+    selectedSettings[type] = parseInt(value);
+    const column = element.closest('.setup-column');
+    column.querySelectorAll('.selection-card').forEach(c => c.classList.remove('active'));
+    element.classList.add('active');
+
+
     const nextBtn = document.getElementById('globalNext');
-    if (!nextBtn) return;
-
-    const currentScreen = appFlow[currentFlowIndex];
-
-    if (currentScreen === 'boothScreen') {
-        // Di booth, tombol NEXT hanya aktif jika foto sudah penuh (shots tidak null)
-        const filledShots = shots.filter(s => s !== null).length;
-        nextBtn.disabled = (filledShots !== maxShots);
-
-        // Tambahkan efek visual jika sudah penuh
-        if (filledShots === maxShots) {
-            nextBtn.classList.add('pulse-animation');
-        } else {
-            nextBtn.classList.remove('pulse-animation');
-        }
-    } else {
-        // Di screen lain (Tutorial/Setup), tombol NEXT selalu aktif
+    if (selectedSettings.timer !== null && selectedSettings.count !== null) {
         nextBtn.disabled = false;
-        nextBtn.classList.remove('pulse-animation');
-    } const originalUpdatePreview = updatePreview;
-    updatePreview = function () {
-        originalUpdatePreview(); // Jalankan fungsi lama
-        updateGlobalNextStatus(); // Sinkronkan ke tombol global
-    };
-
-}
-
-// 3. Fungsi Navigasi Maju (Global Next)
-function goNext() {
-    const currentScreen = appFlow[currentFlowIndex];
-
-    if (currentScreen === 'setupScreen') {
-        if (selectedSettings.timer === null || selectedSettings.count === null) {
-            alert("Mohon pilih durasi foto dan jumlah foto terlebih dahulu!");
-            return;
-        }
-        confirmSetup();
-
-    } else if (currentScreen === 'boothScreen') {
-        const filledShots = shots.filter(s => s !== null).length;
-        const maxShots = selectedSettings.count;
-
-        if (filledShots === maxShots) {
-            const userSetuju = confirm("Apakah Anda sudah puas dengan hasil foto? Klik OK untuk memproses kolase.");
-            if (userSetuju) {
-                makeCollage();
-            }
-        } else {
-            alert("Silahkan ambil semua foto terlebih dahulu!");
-        }
-    } else {
-        currentFlowIndex++;
-        showScreen(appFlow[currentFlowIndex]);
-    }
-}
-// 4. Fungsi Navigasi Mundur (Global Prev)
-function goBack() {
-    if (currentFlowIndex > 0) {
-        // Jika mundur dari booth ke setup, tawarkan reset foto
-        if (appFlow[currentFlowIndex] === 'boothScreen') {
-            if (!confirm("Kembali ke setup akan menghapus foto yang sudah diambil. Lanjutkan?")) return;
-            shots = [];
-        }
-        currentFlowIndex--;
-        showScreen(appFlow[currentFlowIndex]);
+        nextBtn.style.opacity = "1";
     }
 }
 
-/* ================= DOM ELEMENTS ================= */
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const collage = document.getElementById('collage');
-const flash = document.getElementById('flash');
-const countdownEl = document.getElementById('countdown');
-const previewStrip = document.getElementById('previewStrip');
-const shutterBtn = document.getElementById('shutterBtn');
-const boothScreen = document.getElementById('boothScreen');
-const resultScreen = document.getElementById('resultScreen');
-const mirrorBtn = document.getElementById('mirrorBtn');
+function confirmSetup() {
+    USER_SETTINGS.timer = selectedSettings.timer;
+    USER_SETTINGS.count = selectedSettings.count;
+    maxShots = USER_SETTINGS.count;
+    shots = [];
+    currentShot = 0;
+    replaceIndex = null;
+    showScreen('boothScreen');
+    updatePreview();
+}
 
 
-const ctx = canvas.getContext('2d');
-const cctx = collage.getContext('2d');
-
-/* ================= CAMERA SETUP ================= */
-navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } })
-    .then(stream => {
-        video.srcObject = stream;
-
-        if (isMirrored) {
-            video.classList.add('mirrored');
-        } else {
-            video.classList.remove('mirrored');
-        }
-    })
-    .catch(err => alert("Kamera tidak diizinkan atau tidak ditemukan"));
-
-// Fungsi untuk mendeteksi daftar kamera
 async function initCameraList() {
     const select = document.getElementById('cameraSelect');
     if (!select) return;
 
     try {
-        // Minta izin akses kamera sebentar untuk mendapatkan label/nama kamera
         const tempStream = await navigator.mediaDevices.getUserMedia({ video: true });
         tempStream.getTracks().forEach(track => track.stop());
 
@@ -301,18 +304,16 @@ async function initCameraList() {
             select.appendChild(option);
         });
 
-        // Jika user ganti pilihan di dropdown
         select.onchange = async () => {
             currentDeviceId = select.value;
             if (document.getElementById('boothScreen').style.display !== 'none') {
-                startVideo(); // Langsung ganti kamera jika sedang di booth
+                startVideo();
             }
         };
 
         if (videoDevices.length > 0) currentDeviceId = videoDevices[0].deviceId;
-
     } catch (err) {
-        console.error("Gagal mendeteksi kamera:", err);
+        console.error("Gagal mendeteksi kamera");
         select.innerHTML = '<option>Akses Kamera Ditolak</option>';
     }
 }
@@ -322,7 +323,6 @@ async function startVideo() {
         window.stream.getTracks().forEach(track => track.stop());
     }
 
-    // Gunakan pengaturan yang lebih longgar agar OBS lebih mudah sinkron
     const constraints = {
         video: {
             deviceId: currentDeviceId ? { exact: currentDeviceId } : undefined,
@@ -335,180 +335,110 @@ async function startVideo() {
     try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
         window.stream = stream;
-        const videoElement = document.getElementById('video');
-        videoElement.srcObject = stream;
-
-        // Pastikan video tidak diam (freeze)
-        videoElement.onloadedmetadata = () => {
-            videoElement.play();
-        };
+        video.srcObject = stream;
+        video.onloadedmetadata = () => video.play();
     } catch (err) {
-        console.error("Gagal memulai kamera:", err);
-        // Fallback jika resolusi ideal gagal
-        if (err.name === "OverconstrainedError") {
-            const basicStream = await navigator.mediaDevices.getUserMedia({ video: true });
-            document.getElementById('video').srcObject = basicStream;
+        console.error("Gagal memulai kamera");
+        const basicStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = basicStream;
+    }
+}
+
+
+async function countdown(sec) {
+    countdownEl.style.opacity = 1;
+    for (let i = sec; i > 0; i--) {
+        countdownEl.textContent = i;
+        await new Promise(r => setTimeout(r, 1000));
+    }
+    countdownEl.style.opacity = 0;
+}
+
+shutterBtn.onclick = async function () {
+    if (isCounting) return;
+
+    if (shots.length === 0) {
+        shots = new Array(maxShots).fill(null);
+    }
+
+    let emptyIdx = shots.findIndex(slot => slot === null);
+
+    if (replaceIndex === null && emptyIdx === -1) {
+        if (confirm("Slot foto sudah penuh. Ingin reset semua dan ambil ulang?")) {
+            shots = new Array(maxShots).fill(null);
+            updatePreview();
+            emptyIdx = 0;
+            const globalNext = document.getElementById('globalNext');
+            if (globalNext) globalNext.disabled = true;
+        } else {
+            return;
         }
     }
-}
 
-document.addEventListener('DOMContentLoaded', () => {
-    initCameraList();
-    initTextureGallery();
-    initFrameGallery();
+    isCounting = true;
+    const loopStart = (replaceIndex !== null) ? 0 : (emptyIdx === -1 ? 0 : emptyIdx);
+    const loopEnd = (replaceIndex !== null) ? 1 : maxShots;
 
-    const nav = document.getElementById('mainNavigation');
-    if (nav) nav.style.display = 'none';
-});
+    for (let i = loopStart; i < loopEnd; i++) {
+        let targetIndex = (replaceIndex !== null) ? replaceIndex : i;
+        if (replaceIndex === null && shots[targetIndex]) continue;
 
-/* ================= MULTI-STEP NAVIGATION ================= */
-function goToStep(step) {
-    const totalSteps = 3;
+        await countdown(USER_SETTINGS.timer);
+        flash.classList.add('flash');
+        setTimeout(() => flash.classList.remove('flash'), 300);
 
-    document.querySelectorAll('.editor-step').forEach(el => el.classList.remove('active'));
-    const targetStep = document.getElementById(`step${step}`);
-    if (targetStep) targetStep.classList.add('active');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
 
-    const prevBtn = document.getElementById('prevStep');
-    const nextBtn = document.getElementById('nextStep');
-    const finalActions = document.getElementById('finalActions');
+        ctx.save();
+        ctx.filter = FILTERS[activeFilter] || 'none';
 
-    if (nextBtn) {
-        nextBtn.disabled = false; // Pastikan tombol aktif kembali
-        nextBtn.style.opacity = "1";
-    }
+        if (isMirrored && video.classList.contains('mirrored')) {
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+        }
 
-    if (prevBtn) prevBtn.style.visibility = (step === 1) ? 'hidden' : 'visible';
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        ctx.restore();
 
-    if (step === totalSteps) {
-        nextBtn.textContent = "Download & Finish";
-        nextBtn.classList.add('download-mode');
-        // Logika klik untuk download bisa ditaruh di sini atau di event listener terpisah
-    } else {
-        nextBtn.textContent = "Next";
-        nextBtn.classList.remove('download-mode');
-    }
+        const data = canvas.toDataURL('image/png');
+        shots[targetIndex] = data;
+        updatePreview();
 
-    if (step === 2) {
-        initFrameGallery();
-    }
+        if (replaceIndex !== null) {
+            replaceIndex = null;
+            break;
+        }
 
-    if (finalActions) finalActions.style.display = 'none';
-
-    currentStep = step;
-}
-
-let selectedSettings = {
-    timer: null,
-    count: null
-};
-
-function updateSelection(type, value, element) {
-    selectedSettings[type] = parseInt(value);
-
-    // Visual feedback
-    const column = element.closest('.setup-column');
-    column.querySelectorAll('.selection-card').forEach(c => c.classList.remove('active'));
-    element.classList.add('active');
-
-    // Aktifkan tombol NEXT global
-    const nextBtn = document.getElementById('globalNext'); // Sesuaikan ID
-    if (selectedSettings.timer !== null && selectedSettings.count !== null) {
-        nextBtn.disabled = false;
-        nextBtn.style.opacity = "1";
-    }
-}
-document.getElementById('nextStep').onclick = () => {
-    if (currentStep < 3) {
-        goToStep(currentStep + 1);
-    } else {
-        const pesan = "Apakah desain sudah sesuai? Foto akan didownload dan Anda akan kembali ke layar kamera.";
-
-        if (confirm(pesan)) {
-            const link = document.createElement('a');
-            link.download = `photobooth-${Date.now()}.png`;
-            link.href = collage.toDataURL('image/png');
-            link.click();
+        if (i < loopEnd - 1) {
+            await new Promise(r => setTimeout(r, 1500));
         }
     }
+
+    USER_SETTINGS.filter = activeFilter;
+    isCounting = false;
 };
-document.getElementById('prevStep').onclick = () => {
-    if (currentStep > 1) goToStep(currentStep - 1);
-};
 
 
+function updateMirrorState() {
 
-function confirmSetup() {
-    USER_SETTINGS.timer = selectedSettings.timer;
-    USER_SETTINGS.count = selectedSettings.count;
+    isMirrored = video.classList.contains('mirrored');
 
-    maxShots = USER_SETTINGS.count;
-    shots = [];
-    currentShot = 0;
-    replaceIndex = null;
+    console.log('Mirror updated:', isMirrored ? 'ON' : 'OFF');
 
-    showScreen('boothScreen');
 
-    updatePreview();
-}
-
-function applyStyleSettings() {
-    activeFilter = USER_SETTINGS.filter;
-    video.style.filter = FILTERS[activeFilter];
-}
-
-function drawCoverImage(targetCtx, img, canvasW, canvasH) {
-    const imgRatio = img.width / img.height;
-    const canvasRatio = canvasW / canvasH;
-    let sx, sy, sw, sh;
-
-    if (imgRatio > canvasRatio) {
-        sh = img.height;
-        sw = img.height * canvasRatio;
-        sx = (img.width - sw) / 2;
-        sy = 0;
-    } else {
-        sw = img.width;
-        sh = img.width / canvasRatio;
-        sx = 0;
-        sy = (img.height - sh) / 2;
+    if (mirrorBtn) {
+        const icon = mirrorBtn.querySelector('i');
+        if (icon) {
+            feather.replace();
+        }
     }
-    targetCtx.drawImage(img, sx, sy, sw, sh, 0, 0, canvasW, canvasH);
-}
-
-function getAverageColor(imgElement) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const width = canvas.width = imgElement.naturalWidth || imgElement.width;
-    const height = canvas.height = imgElement.naturalHeight || imgElement.height;
-
-    ctx.drawImage(imgElement, 0, 0);
-
-    const imageData = ctx.getImageData(0, 0, width, height).data;
-    let r = 0, g = 0, b = 0;
-
-    for (let i = 0; i < imageData.length; i += 4) {
-        r += imageData[i];
-        g += imageData[i + 1];
-        b += imageData[i + 2];
-    }
-
-    const count = imageData.length / 4;
-    r = Math.floor(r / count);
-    g = Math.floor(g / count);
-    b = Math.floor(b / count);
-
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-}
-
-/* ================= CORE FUNCTIONS ================= */
-function startCameraNow() {
-    showScreen('boothScreen');
-    console.log("Kamera diaktifkan, masuk ke pengaturan timer...");
-    updatePreview();
 }
 
 function updatePreview() {
+    if (!previewStrip) return;
+
     previewStrip.innerHTML = '';
     for (let i = 0; i < maxShots; i++) {
         const box = document.createElement('div');
@@ -537,120 +467,207 @@ function updatePreview() {
             box.appendChild(delBtn);
         }
         previewStrip.appendChild(box);
-
-        const filledShots = shots.filter(s => s !== null).length;
-        const isFull = (filledShots === maxShots);
-
-        // Update tombol NEXT global
-        const globalNextBtn = document.getElementById('globalNext');
-        if (globalNextBtn) {
-            globalNextBtn.disabled = !isFull;
-            // Tambahkan efek visual agar user tahu tombol sudah aktif
-            if (isFull) {
-                globalNextBtn.style.opacity = "1";
-                globalNextBtn.classList.add('pulse-animation');
-            } else {
-                globalNextBtn.style.opacity = "0.3";
-                globalNextBtn.classList.remove('pulse-animation');
-            }
-        }
-
-        // Tombol process lama (jika masih ada di HTML) bisa disembunyikan saja
-        const processBtn = document.getElementById('process');
-        if (processBtn) processBtn.style.display = 'none';
     }
 
-    // --- LOGIKA DISABLE/ENABLE TOMBOL NEXT ---
     const filledShots = shots.filter(s => s !== null).length;
     const isFull = (filledShots === maxShots);
-
-    // Tombol orisinil (ID: process)
-    const processBtn = document.getElementById('process');
-    if (processBtn) {
-        processBtn.disabled = !isFull;
-        if (isFull) processBtn.classList.add('pulse-animation');
-        else processBtn.classList.remove('pulse-animation');
-    }
-
-    // Tombol Navigasi Global (ID: globalNext)
     const globalNextBtn = document.getElementById('globalNext');
+
     if (globalNextBtn) {
         globalNextBtn.disabled = !isFull;
-        // Opsional: tambah gaya visual saat aktif
         globalNextBtn.style.opacity = isFull ? "1" : "0.3";
-    }
-}
-
-async function countdown(sec) {
-    countdownEl.style.opacity = 1;
-    for (let i = sec; i > 0; i--) {
-        countdownEl.textContent = i;
-        await new Promise(r => setTimeout(r, 1000));
-    }
-    countdownEl.style.opacity = 0;
-}
-
-shutterBtn.onclick = async () => {
-    if (isCounting) return;
-
-    if (shots.length === 0) {
-        shots = new Array(maxShots).fill(null);
-    }
-
-    let emptyIdx = shots.findIndex(slot => slot === null);
-
-    if (replaceIndex === null && emptyIdx === -1) {
-        if (confirm("Slot foto sudah penuh. Ingin reset semua dan ambil ulang?")) {
-            shots = new Array(maxShots).fill(null);
-            updatePreview();
-            emptyIdx = 0;
+        if (isFull) {
+            globalNextBtn.classList.add('pulse-animation');
         } else {
-            return;
+            globalNextBtn.classList.remove('pulse-animation');
         }
     }
+}
 
-    isCounting = true;
 
-    const loopStart = (replaceIndex !== null) ? 0 : (emptyIdx === -1 ? 0 : emptyIdx);
-    const loopEnd = (replaceIndex !== null) ? 1 : maxShots;
+function renderBoothFilters() {
+    const filterWrapper = document.getElementById('boothFilterList');
+    if (!filterWrapper) return;
 
-    for (let i = loopStart; i < loopEnd; i++) {
-        let targetIndex = (replaceIndex !== null) ? replaceIndex : i;
+    filterWrapper.innerHTML = '';
+    Object.keys(FILTERS).forEach(key => {
+        const card = document.createElement('div');
+        card.className = `filter-item-card ${activeFilter === key ? 'active' : ''}`;
+        card.innerText = key;
 
-        if (replaceIndex === null && shots[targetIndex]) continue;
-        await countdown(USER_SETTINGS.timer);
+        card.onclick = () => {
+            activeFilter = key;
+            video.style.filter = FILTERS[key];
+            document.querySelectorAll('.filter-item-card').forEach(el => el.classList.remove('active'));
+            card.classList.add('active');
+        };
+        filterWrapper.appendChild(card);
+    });
+}
 
-        flash.classList.add('flash');
-        setTimeout(() => flash.classList.remove('flash'), 300);
+function scrollFilter(direction) {
+    const wrapper = document.getElementById('boothFilterList');
+    const amount = 300;
+    wrapper.scrollLeft += direction === 'left' ? -amount : amount;
+}
 
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
 
-        ctx.save();
-        if (isMirrored) {
-            ctx.translate(canvas.width, 0);
-            ctx.scale(-1, 1);
-        }
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        ctx.restore();
+function syncEditorInputs() {
+    if (!document.getElementById('textPrimaryEditor')) return;
 
-        const data = canvas.toDataURL('image/png');
-        shots[targetIndex] = data;
+    document.getElementById('frameColorEditor').value = USER_SETTINGS.frameColor || '#ffffff';
+    document.getElementById('storeColorEditor').value = USER_SETTINGS.storeColor || '#000000';
+    document.getElementById('useStoreColor').checked = USER_SETTINGS.useStoreColor || false;
+    document.getElementById('textPrimaryEditor').value = USER_SETTINGS.textPrimaryEditor || '';
+    document.getElementById('textSecondaryEditor').value = USER_SETTINGS.textSecondary || '';
+    document.getElementById('emojiSelectEditor').value = USER_SETTINGS.emoji || '';
+    document.getElementById('dateModeEditor').value = USER_SETTINGS.dateModeEditor || 'auto';
+    document.getElementById('customDateEditor').value = USER_SETTINGS.customDate || '';
 
-        updatePreview();
 
-        if (replaceIndex !== null) {
-            replaceIndex = null;
-            break;
-        }
+    document.getElementById('storeColorEditor').style.display = USER_SETTINGS.useStoreColor ? 'block' : 'none';
 
-        if (i < loopEnd - 1) {
-            await new Promise(r => setTimeout(r, 1500));
-        }
+
+    const customDateInput = document.getElementById('customDateEditor');
+    if (USER_SETTINGS.dateModeEditor === 'custom') {
+        customDateInput.style.display = 'block';
+
+        const today = new Date().toISOString().split("T")[0];
+        customDateInput.setAttribute('max', today);
+    } else {
+        customDateInput.style.display = 'none';
+    }
+}
+
+window.updateLiveSettings = function () {
+
+    USER_SETTINGS.textPrimaryEditor = document.getElementById('textPrimaryEditor').value;
+    USER_SETTINGS.textSecondary = document.getElementById('textSecondaryEditor').value;
+    USER_SETTINGS.emoji = document.getElementById('emojiSelectEditor').value;
+    USER_SETTINGS.frameColor = document.getElementById('frameColorEditor').value;
+    USER_SETTINGS.storeColor = document.getElementById('storeColorEditor').value;
+    USER_SETTINGS.useStoreColor = document.getElementById('useStoreColor').checked;
+    USER_SETTINGS.dateModeEditor = document.getElementById('dateModeEditor').value;
+
+    const customDateInput = document.getElementById('customDateEditor');
+    if (USER_SETTINGS.dateModeEditor === 'custom') {
+        USER_SETTINGS.customDate = customDateInput.value;
+        customDateInput.style.display = 'block';
+    } else {
+        USER_SETTINGS.customDate = '';
+        customDateInput.style.display = 'none';
     }
 
-    isCounting = false;
+    document.getElementById('storeColorEditor').style.display = USER_SETTINGS.useStoreColor ? 'block' : 'none';
+
+
+    triggerMakeCollage();
 };
+
+function handleDateModeChange() {
+    const dateMode = this.value;
+    USER_SETTINGS.dateModeEditor = dateMode;
+
+    const customDateInput = document.getElementById('customDateEditor');
+    if (dateMode === 'custom') {
+        customDateInput.style.display = 'block';
+
+        if (!customDateInput.value) {
+            const today = new Date().toISOString().split("T")[0];
+            customDateInput.value = today;
+            USER_SETTINGS.customDate = today;
+        }
+    } else {
+        customDateInput.style.display = 'none';
+        USER_SETTINGS.customDate = '';
+    }
+
+    triggerMakeCollage();
+}
+
+function triggerMakeCollage() {
+    if (window.collageTimeout) clearTimeout(window.collageTimeout);
+
+    window.collageTimeout = setTimeout(() => {
+        if (shots && shots.length > 0 && shots.some(s => s !== null)) {
+            makeCollage();
+        }
+    }, 100);
+}
+
+
+function handleManualUpload(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function (event) {
+        if (shots.length < maxShots) {
+            shots.push(event.target.result);
+            updatePreview();
+        } else {
+            alert("Slot foto sudah penuh!");
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleBackgroundUpload(inputElement) {
+    if (!inputElement.files || inputElement.files.length === 0) return;
+
+    const bgFile = inputElement.files[0];
+    if (!bgFile.type.startsWith('image/')) {
+        alert("Hanya file gambar yang diizinkan!");
+        inputElement.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        USER_SETTINGS.bgImage = e.target.result;
+        document.getElementById('removeUploadBtn').style.display = 'flex';
+        document.getElementById('removeTextureBtn').style.display = 'none';
+        document.querySelectorAll('.texture-item').forEach(el => el.classList.remove('active'));
+        triggerMakeCollage();
+    };
+    reader.readAsDataURL(bgFile);
+}
+
+window.removeSpecificBg = function (type) {
+    if (type === 'upload') {
+        USER_SETTINGS.bgImage = null;
+        document.getElementById('removeUploadBtn').style.display = 'none';
+        const uploadInput = document.getElementById('bgUploadEditor');
+        if (uploadInput) uploadInput.value = '';
+    } else if (type === 'texture') {
+        USER_SETTINGS.bgImage = null;
+        document.querySelectorAll('.texture-item').forEach(el => el.classList.remove('active'));
+        document.getElementById('removeTextureBtn').style.display = 'none';
+    }
+    triggerMakeCollage();
+};
+
+function removeFrameTemplate() {
+    USER_SETTINGS.frameID = null;
+    document.querySelectorAll('#frameTemplateGallery .texture-item').forEach(el => el.classList.remove('active'));
+    const removeFrameBtn = document.getElementById('removeFrameBtn');
+    if (removeFrameBtn) removeFrameBtn.style.display = 'none';
+    makeCollage();
+}
+
+function clearCurrentShots() {
+    if (confirm("Hapus semua foto yang baru saja diambil?")) {
+        shots = [];
+        currentShot = 0;
+        previewStrip.innerHTML = '';
+        const globalNext = document.getElementById('globalNext');
+        if (globalNext) {
+            globalNext.disabled = true;
+            globalNext.style.opacity = "0.3";
+        }
+    }
+}
+
 
 function getContrastColor(hexColor) {
     if (!hexColor) return '#000000';
@@ -662,289 +679,29 @@ function getContrastColor(hexColor) {
     return brightness > 128 ? '#000000' : '#ffffff';
 }
 
-window.updateLiveSettings = function () {
-    USER_SETTINGS.filter = document.getElementById('filterEditor').value;
-    USER_SETTINGS.frameColor = document.getElementById('frameColorEditor').value;
-    USER_SETTINGS.storeColor = document.getElementById('storeColorEditor').value;
-    USER_SETTINGS.useStoreColor = document.getElementById('useStoreColor').checked;
-    USER_SETTINGS.textPrimaryEditor = document.getElementById('textPrimaryEditor').value;
-    USER_SETTINGS.textSecondary = document.getElementById('textSecondaryEditor').value;
-    USER_SETTINGS.emoji = document.getElementById('emojiSelectEditor').value;
-    USER_SETTINGS.dateModeEditor = document.getElementById('dateModeEditor').value;
+function getAverageColor(imgElement) {
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    const width = tempCanvas.width = imgElement.naturalWidth || imgElement.width;
+    const height = tempCanvas.height = imgElement.naturalHeight || imgElement.height;
 
-    const hasBackground = USER_SETTINGS.bgImage !== null;
-    const customDateInput = document.getElementById('customDateEditor');
-    USER_SETTINGS.customDate = customDateInput.value;
-    customDateInput.style.display = (USER_SETTINGS.dateModeEditor === 'custom') ? 'block' : 'none';
+    tempCtx.drawImage(imgElement, 0, 0);
+    const imageData = tempCtx.getImageData(0, 0, width, height).data;
 
-    const bgFile = document.getElementById('bgUploadEditor').files[0];
-    const isUpload = bgFile !== undefined;
-    const removeUploadBtn = document.getElementById('removeUploadBtn');
-    const removeTextureBtn = document.getElementById('removeTextureBtn');
-
-    const storeInput = document.getElementById('storeColorEditor');
-    const frameInput = document.getElementById('frameColorEditor');
-    const storeCheckbox = document.getElementById('useStoreColor');
-
-    USER_SETTINGS.useStoreColor = storeCheckbox.checked;
-    USER_SETTINGS.storeColor = storeInput.value;
-
-    storeInput.style.display = storeCheckbox.checked ? 'block' : 'none';
-
-    if (hasBackground) {
-        storeInput.style.opacity = "0.4";
-        storeInput.style.pointerEvents = "none";
-        frameInput.style.opacity = "0.4";
-        frameInput.style.pointerEvents = "none";
-        storeCheckbox.disabled = true;
-    } else {
-        storeInput.style.opacity = "1";
-        storeInput.style.pointerEvents = "auto";
-        frameInput.style.opacity = "1";
-        frameInput.style.pointerEvents = "auto";
-        storeCheckbox.disabled = false;
-        storeInput.style.display = USER_SETTINGS.useStoreColor ? 'block' : 'none';
+    let r = 0, g = 0, b = 0;
+    for (let i = 0; i < imageData.length; i += 4) {
+        r += imageData[i];
+        g += imageData[i + 1];
+        b += imageData[i + 2];
     }
 
-    if (isUpload) {
-        storeInput.style.opacity = "0.5";
-        frameInput.style.opacity = "0.5";
-        storeCheckbox.disabled = true;
-    } else {
-        storeInput.style.opacity = "1";
-        frameInput.style.opacity = "1";
-        storeCheckbox.disabled = false;
-        storeInput.style.display = USER_SETTINGS.useStoreColor ? 'block' : 'none';
-    }
+    const count = imageData.length / 4;
+    r = Math.floor(r / count);
+    g = Math.floor(g / count);
+    b = Math.floor(b / count);
 
-    if (bgFile) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            USER_SETTINGS.bgImage = e.target.result;
-            if (removeUploadBtn) removeUploadBtn.style.display = 'flex';
-            if (removeTextureBtn) removeTextureBtn.style.display = 'none';
-
-            document.querySelectorAll('.texture-item').forEach(el => el.classList.remove('active'));
-
-            makeCollage();
-        };
-        reader.readAsDataURL(bgFile);
-    } else {
-        makeCollage();
-    }
-};
-
-window.removeSpecificBg = function (type) {
-    USER_SETTINGS.bgImage = null;
-
-    if (type === 'upload') {
-        const uploadInput = document.getElementById('bgUploadEditor');
-        if (uploadInput) uploadInput.value = '';
-        document.getElementById('removeUploadBtn').style.display = 'none';
-    } else {
-        document.querySelectorAll('.texture-item').forEach(el => el.classList.remove('active'));
-        document.getElementById('removeTextureBtn').style.display = 'none';
-    }
-
-    makeCollage();
-};
-function syncEditorInputs() {
-    if (!document.getElementById('filterEditor')) return;
-    document.getElementById('filterEditor').value = USER_SETTINGS.filter;
-    document.getElementById('frameColorEditor').value = USER_SETTINGS.frameColor;
-    document.getElementById('textPrimaryEditor').value = USER_SETTINGS.textPrimaryEditor;
-    document.getElementById('textSecondaryEditor').value = USER_SETTINGS.textSecondary;
-    document.getElementById('emojiSelectEditor').value = USER_SETTINGS.emoji;
-    document.getElementById('dateModeEditor').value = USER_SETTINGS.dateModeEditor;
-
-    initTextureGallery();
-
-    const removeBtn = document.getElementById('removeBgEditor');
-    if (removeBtn) {
-        removeBtn.style.display = USER_SETTINGS.bgImage ? 'flex' : 'none';
-    }
-
-    const today = new Date().toISOString().split("T")[0];
-    document.getElementById('customDateEditor').setAttribute('max', today);
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
 }
-
-window.removeBackground = function () {
-    USER_SETTINGS.bgImage = null;
-
-    const uploadInput = document.getElementById('bgUploadEditor');
-    if (uploadInput) uploadInput.value = '';
-
-    const removeBtn = document.getElementById('removeBgEditor');
-    if (removeBtn) removeBtn.style.display = 'none';
-
-    document.querySelectorAll('.texture-item').forEach(el => el.classList.remove('active'));
-
-    makeCollage();
-};
-
-/* ================= COLLAGE LOGIC ================= */
-async function makeCollage() {
-    const offCanvas = document.createElement('canvas');
-    const offCtx = offCanvas.getContext('2d');
-
-    const margin = 40;
-    const photoW = 375;
-    const photoH = 500;
-    const isDoubleStrip = maxShots > 3;
-    const shotsPerStrip = isDoubleStrip ? Math.ceil(maxShots / 2) : maxShots;
-    const singleStripW = photoW + (margin * 2);
-
-    offCanvas.width = isDoubleStrip ? (singleStripW * 2) : singleStripW;
-    offCanvas.height = (photoH * shotsPerStrip) + (margin * (shotsPerStrip + 1)) + 180;
-
-    let useFramePNG = false;
-    const frameImg = new Image();
-
-    if (USER_SETTINGS.frameID) {
-        const currentFramePath = `frame/${maxShots}/${USER_SETTINGS.frameID}.png`;
-        frameImg.crossOrigin = "anonymous";
-        frameImg.src = `${currentFramePath}?t=${new Date().getTime()}`;
-
-        try {
-            await new Promise((resolve) => {
-                frameImg.onload = () => {
-                    useFramePNG = true;
-                    resolve();
-                };
-                frameImg.onerror = () => {
-                    console.warn("Template Frame tidak ditemukan di:", currentFramePath);
-                    useFramePNG = false;
-                    resolve();
-                };
-            });
-        } catch (e) { useFramePNG = false; }
-    }
-
-    // 3. FUNGSI RENDER PER STRIP
-    const renderStripSection = async (offsetX, isRightStrip) => {
-        const stripRect = { x: offsetX, y: 0, w: singleStripW, h: offCanvas.height };
-        let textColor = "#000000";
-
-        // --- A. DRAW BACKGROUND ---
-        if (USER_SETTINGS.bgImage) {
-            const bgImg = new Image();
-            bgImg.src = USER_SETTINGS.bgImage;
-            await new Promise(r => bgImg.onload = r);
-
-            const isTexture = USER_SETTINGS.bgImage.includes('texture/');
-
-            drawImageToRect(offCtx, bgImg, stripRect, isTexture ? 'fit' : 'cover');
-
-            if (typeof getAverageColor === 'function') {
-                textColor = getContrastColor(getAverageColor(bgImg));
-            }
-        } else {
-            offCtx.fillStyle = USER_SETTINGS.useStoreColor ? USER_SETTINGS.storeColor : USER_SETTINGS.frameColor;
-            offCtx.fillRect(stripRect.x, stripRect.y, stripRect.w, stripRect.h);
-
-            if (USER_SETTINGS.useStoreColor) {
-                const border = 15;
-                offCtx.fillStyle = USER_SETTINGS.frameColor;
-                offCtx.fillRect(stripRect.x + border, stripRect.y + border, stripRect.w - (border * 2), stripRect.h - (border * 2));
-            }
-            textColor = getContrastColor(USER_SETTINGS.frameColor);
-        }
-
-        // --- B. DRAW PHOTOS (Di bawah frame) ---
-        for (let i = 0; i < shotsPerStrip; i++) {
-            let currentIdx = isDoubleStrip
-                ? (isRightStrip ? (i * 2 + 1) : (i * 2))
-                : i;
-
-            if (currentIdx >= maxShots || !shots[currentIdx]) continue;
-
-            const img = new Image();
-            img.src = shots[currentIdx];
-            await new Promise(r => img.onload = r);
-
-            const posX = offsetX + margin;
-            const posY = margin + i * (photoH + margin);
-
-            offCtx.save();
-            offCtx.filter = FILTERS[USER_SETTINGS.filter] || 'none';
-
-            // Cropping otomatis 4:3
-            const targetRatio = photoW / photoH;
-            const imgRatio = img.width / img.height;
-            let sx, sy, sw, sh;
-            if (imgRatio > targetRatio) {
-                sh = img.height; sw = img.height * targetRatio;
-                sx = (img.width - sw) / 2; sy = 0;
-            } else {
-                sw = img.width; sh = img.width / targetRatio;
-                sx = 0; sy = (img.height - sh) / 2;
-            }
-
-            offCtx.drawImage(img, sx, sy, sw, sh, posX, posY, photoW, photoH);
-            offCtx.restore();
-
-            // Render Emoji
-            if (USER_SETTINGS.emoji) {
-                offCtx.font = "45px Arial";
-                offCtx.fillStyle = textColor;
-                offCtx.fillText(USER_SETTINGS.emoji, posX + 20, posY + 50);
-            }
-        }
-
-        // --- C. DRAW FRAME PNG OVERLAY (Layer paling atas) ---
-        if (useFramePNG) {
-            offCtx.drawImage(frameImg, offsetX, 0, singleStripW, offCanvas.height);
-        }
-
-        // --- D. RENDER TEKS & TANGGAL ---
-        offCtx.fillStyle = textColor;
-        offCtx.textAlign = "center";
-        const centerX = offsetX + (singleStripW / 2);
-        let textY = offCanvas.height - 120;
-
-        if (USER_SETTINGS.textPrimaryEditor) {
-            offCtx.font = "bold 40px Arial";
-            offCtx.fillText(USER_SETTINGS.textPrimaryEditor, centerX, textY);
-            textY += 45;
-        }
-        if (USER_SETTINGS.textSecondary) {
-            offCtx.font = "22px Arial";
-            offCtx.fillText(USER_SETTINGS.textSecondary, centerX, textY);
-        }
-
-        let dateStr = "";
-        if (USER_SETTINGS.dateModeEditor === 'auto') {
-            const d = new Date();
-            dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
-        } else if (USER_SETTINGS.dateModeEditor === 'custom' && USER_SETTINGS.customDate) {
-            const p = USER_SETTINGS.customDate.split('-');
-            if (p.length === 3) dateStr = `${p[2]}/${p[1]}/${p[0]}`;
-        }
-
-        if (dateStr && USER_SETTINGS.dateModeEditor !== 'off' && USER_SETTINGS.dateModeEditor !== 'without') {
-            offCtx.font = "italic 18px Arial";
-            offCtx.fillText(dateStr, centerX, offCanvas.height - 35);
-        }
-    };
-
-    // 4. EKSEKUSI RENDER
-    await renderStripSection(0, false);
-    if (isDoubleStrip) {
-        await renderStripSection(singleStripW, true);
-    }
-
-    // 5. UPDATE TAMPILAN CANVAS UTAMA
-    const collageCanvas = document.getElementById('collage');
-    collageCanvas.width = offCanvas.width;
-    collageCanvas.height = offCanvas.height;
-    const cctx = collageCanvas.getContext('2d');
-    cctx.drawImage(offCanvas, 0, 0);
-
-    // 6. SWITCH SCREEN
-    showScreen('resultScreen');
-}
-
-
 
 function drawZoomedImage(ctx, img, x, y, w, h, zoom) {
     const imgRatio = img.width / img.height;
@@ -1013,83 +770,285 @@ function drawImageToRect(targetCtx, img, rect, mode = 'cover') {
     }
 }
 
-/* ================= EVENT HANDLERS ================= */
-const darkModeToggle = document.getElementById('darkModeToggle');
+async function makeCollage() {
+    if (!collage) return;
 
-if (darkModeToggle) {
-    darkModeToggle.addEventListener('change', () => {
-        if (darkModeToggle.checked) {
-            document.body.classList.add('dark-theme');
-        } else {
-            document.body.classList.remove('dark-theme');
-        }
-    });
-}
+    const offCanvas = document.createElement('canvas');
+    const offCtx = offCanvas.getContext('2d');
 
+    const margin = 40;
+    const photoW = 375;
+    const photoH = 500;
+    const isDoubleStrip = maxShots > 3;
+    const shotsPerStrip = isDoubleStrip ? Math.ceil(maxShots / 2) : maxShots;
+    const singleStripW = photoW + (margin * 2);
 
-if (mirrorBtn) {
-    mirrorBtn.onclick = () => {
-        isMirrored = !isMirrored;
-        const videoEl = document.getElementById('video');
-        if (isMirrored) {
-            videoEl.classList.add('mirrored');
-        } else {
-            videoEl.classList.remove('mirrored');
-        }
-    };
-}
-function resetToDefaultSettings() {
-    // 1. Reset Data Objek
-    USER_SETTINGS.filter = 'normal';
-    USER_SETTINGS.frameColor = '#ffffff';
-    USER_SETTINGS.useStoreColor = false;
-    USER_SETTINGS.bgImage = null;
-    USER_SETTINGS.textPrimaryEditor = '';
-    USER_SETTINGS.textSecondary = '';
-    USER_SETTINGS.emoji = '';
-    USER_SETTINGS.dateModeEditor = 'auto';
-    USER_SETTINGS.customDate = '';
-    USER_SETTINGS.frameID = null;
+    offCanvas.width = isDoubleStrip ? (singleStripW * 2) : singleStripW;
+    offCanvas.height = (photoH * shotsPerStrip) + (margin * (shotsPerStrip + 1)) + 180;
 
 
-    // 2. Reset Visual Input (Layar Editor)
-    if (document.getElementById('filterEditor')) {
-        document.getElementById('filterEditor').value = 'normal';
-        document.getElementById('frameColorEditor').value = '#ffffff';
-        document.getElementById('storeColorEditor').value = '#000000';
-        document.getElementById('textPrimaryEditor').value = '';
-        document.getElementById('textSecondaryEditor').value = '';
-        document.getElementById('emojiSelectEditor').value = '';
-        document.getElementById('dateModeEditor').value = 'auto';
-        document.getElementById('bgUploadEditor').value = '';
+    offCtx.clearRect(0, 0, offCanvas.width, offCanvas.height);
+
+
+    let useFramePNG = false;
+    const frameImg = new Image();
+
+    if (USER_SETTINGS.frameID) {
+        const currentFramePath = `frame/${maxShots}/${USER_SETTINGS.frameID}.png`;
+        frameImg.crossOrigin = "anonymous";
+        frameImg.src = `${currentFramePath}?t=${Date.now()}`;
+
+        try {
+            await new Promise((resolve, reject) => {
+                frameImg.onload = () => { useFramePNG = true; resolve(); };
+                frameImg.onerror = () => { useFramePNG = false; resolve(); };
+            });
+        } catch { useFramePNG = false; }
     }
 
-    // 3. Reset Filter Kamera
-    video.style.filter = FILTERS['normal'];
+    const renderStripSection = async (offsetX, isRightStrip) => {
+        const stripRect = { x: offsetX, y: 0, w: singleStripW, h: offCanvas.height };
+        let textColor = "#000000";
 
-    // 4. Sembunyikan tombol hapus background
-    const removeBtn = document.getElementById('removeBgEditor');
-    if (removeBtn) removeBtn.style.display = 'none';
 
-    if (document.getElementById('useStoreColor')) {
-        document.getElementById('useStoreColor').checked = false;
-        document.getElementById('storeColorEditor').style.display = 'none';
+        if (USER_SETTINGS.bgImage) {
+            const bgImg = new Image();
+            bgImg.src = USER_SETTINGS.bgImage;
+            await new Promise(r => bgImg.onload = r);
+
+            let mode = 'cover';
+
+            if (USER_SETTINGS.bgImage.includes('texture/')) {
+                mode = 'fit';
+            }
+
+            else if (USER_SETTINGS.bgImage.startsWith('data:')) {
+                mode = 'cover';
+            }
+
+
+            drawImageToRect(offCtx, bgImg, stripRect, mode);
+
+
+            if (typeof getAverageColor === 'function') {
+                textColor = getContrastColor(getAverageColor(bgImg));
+            }
+        } else {
+            offCtx.fillStyle = USER_SETTINGS.useStoreColor ? USER_SETTINGS.storeColor : USER_SETTINGS.frameColor;
+            offCtx.fillRect(stripRect.x, stripRect.y, stripRect.w, stripRect.h);
+
+            if (USER_SETTINGS.useStoreColor) {
+                const border = 15;
+                offCtx.fillStyle = USER_SETTINGS.frameColor;
+                offCtx.fillRect(stripRect.x + border, stripRect.y + border,
+                    stripRect.w - (border * 2), stripRect.h - (border * 2));
+            }
+            textColor = USER_SETTINGS.useStoreColor ?
+                getContrastColor(USER_SETTINGS.storeColor) :
+                getContrastColor(USER_SETTINGS.frameColor);
+        }
+
+
+
+        for (let i = 0; i < shotsPerStrip; i++) {
+            let currentIdx = isDoubleStrip ? (isRightStrip ? (i * 2 + 1) : (i * 2)) : i;
+            if (currentIdx >= maxShots || !shots[currentIdx]) continue;
+
+            const img = new Image();
+            img.src = shots[currentIdx];
+            await new Promise(r => img.onload = r);
+
+            const posX = offsetX + margin;
+            const posY = margin + i * (photoH + margin);
+
+            offCtx.save();
+            offCtx.filter = FILTERS[USER_SETTINGS.filter] || 'none';
+
+
+            const targetRatio = photoW / photoH;
+            const imgRatio = img.width / img.height;
+            let sx, sy, sw, sh;
+
+            if (imgRatio > targetRatio) {
+                sh = img.height; sw = img.height * targetRatio;
+                sx = (img.width - sw) / 2; sy = 0;
+            } else {
+                sw = img.width; sh = img.width / targetRatio;
+                sx = 0; sy = (img.height - sh) / 2;
+            }
+
+            offCtx.drawImage(img, sx, sy, sw, sh, posX, posY, photoW, photoH);
+            offCtx.restore();
+
+
+            if (USER_SETTINGS.emoji) {
+                offCtx.font = "45px Arial";
+                offCtx.fillStyle = textColor;
+                offCtx.fillText(USER_SETTINGS.emoji, posX + 20, posY + 50);
+            }
+        }
+
+
+        if (useFramePNG) {
+            offCtx.drawImage(frameImg, offsetX, 0, singleStripW, offCanvas.height);
+        }
+
+
+        offCtx.fillStyle = textColor;
+        offCtx.textAlign = "center";
+        const centerX = offsetX + (singleStripW / 2);
+        let textY = offCanvas.height - 120;
+
+
+        if (USER_SETTINGS.textPrimaryEditor) {
+            offCtx.font = "bold 40px Arial";
+            offCtx.fillText(USER_SETTINGS.textPrimaryEditor, centerX, textY);
+            textY += 45;
+        }
+
+
+        if (USER_SETTINGS.textSecondary) {
+            offCtx.font = "22px Arial";
+            offCtx.fillText(USER_SETTINGS.textSecondary, centerX, textY);
+        }
+
+
+        let dateStr = "";
+        if (USER_SETTINGS.dateModeEditor === 'auto') {
+            const d = new Date();
+            dateStr = `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}/${d.getFullYear()}`;
+        } else if (USER_SETTINGS.dateModeEditor === 'custom' && USER_SETTINGS.customDate) {
+            const p = USER_SETTINGS.customDate.split('-');
+            if (p.length === 3) {
+                dateStr = `${p[2]}/${p[1]}/${p[0]}`;
+            }
+        }
+
+        if (dateStr && USER_SETTINGS.dateModeEditor !== 'off') {
+            offCtx.font = "italic 18px Arial";
+            offCtx.fillText(dateStr, centerX, offCanvas.height - 35);
+        }
+    };
+
+
+    await renderStripSection(0, false);
+    if (isDoubleStrip) {
+        await renderStripSection(singleStripW, true);
+    }
+
+
+    collage.width = offCanvas.width;
+    collage.height = offCanvas.height;
+    const cctx = collage.getContext('2d');
+    cctx.drawImage(offCanvas, 0, 0);
+};
+
+
+function goToStep(step) {
+    const totalSteps = 3;
+    document.querySelectorAll('.editor-step').forEach(el => el.classList.remove('active'));
+    const targetStep = document.getElementById(`step${step}`);
+    if (targetStep) targetStep.classList.add('active');
+
+    const prevBtn = document.getElementById('prevStep');
+    const nextBtn = document.getElementById('nextStep');
+    const finalActions = document.getElementById('finalActions');
+
+    if (prevBtn) prevBtn.style.visibility = (step === 1) ? 'hidden' : 'visible';
+
+    if (step === totalSteps) {
+        nextBtn.textContent = "Download & Finish";
+        nextBtn.classList.add('download-mode');
+    } else {
+        nextBtn.textContent = "Next";
+        nextBtn.classList.remove('download-mode');
+    }
+
+    if (step === 2) initFrameGallery();
+    if (finalActions) finalActions.style.display = 'none';
+    currentStep = step;
+}
+
+function handleNextStep() {
+    if (currentStep < 3) {
+        goToStep(currentStep + 1);
+    } else {
+        handleDownload();
+    }
+}
+
+function handleDownload() {
+    const pesan = "Apakah desain sudah sesuai? Foto akan didownload dan Anda akan kembali ke layar kamera.";
+
+    if (confirm(pesan)) {
+        const link = document.createElement('a');
+        link.download = `photobooth-${Date.now()}.png`;
+        link.href = collage.toDataURL('image/png');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        resetBooth();
+    }
+}
+
+function goNext() {
+    const currentScreen = appFlow[currentFlowIndex];
+
+    if (currentScreen === 'setupScreen') {
+        if (selectedSettings.timer === null || selectedSettings.count === null) {
+            alert("Mohon pilih durasi foto dan jumlah foto terlebih dahulu!");
+            return;
+        }
+        confirmSetup();
+    } else if (currentScreen === 'boothScreen') {
+        const filledShots = shots.filter(s => s !== null).length;
+        if (filledShots === maxShots) {
+            const userSetuju = confirm("Apakah Anda sudah puas dengan hasil foto? Klik OK untuk memproses kolase.");
+            if (userSetuju) {
+                USER_SETTINGS.filter = activeFilter;
+                makeCollage();
+                showScreen('resultScreen');
+            }
+        } else {
+            alert("Silahkan ambil semua foto terlebih dahulu!");
+        }
+    } else {
+        currentFlowIndex++;
+        showScreen(appFlow[currentFlowIndex]);
+    }
+}
+
+function goBack() {
+    if (currentFlowIndex > 0) {
+        if (appFlow[currentFlowIndex] === 'boothScreen') {
+            if (!confirm("Kembali ke setup akan menghapus foto yang sudah diambil. Lanjutkan?")) return;
+            shots = [];
+        }
+        currentFlowIndex--;
+        showScreen(appFlow[currentFlowIndex]);
     }
 }
 
 function resetBooth() {
-    // Reset data seperti biasa
     shots = [];
     currentShot = 0;
     selectedSettings = { timer: null, count: null };
+    USER_SETTINGS.frameID = null;
 
-    // Sembunyikan Navigasi Global saat balik ke Start
     const globalNav = document.getElementById('mainNavigation');
     if (globalNav) globalNav.style.display = 'none';
 
-    // Pindah ke start screen
     showScreen('startScreen');
+}
 
-    // Opsional: Jika ingin benar-benar "bersih" seperti reload, 
-    // Anda bisa ganti isi fungsi ini dengan: location.reload();
+
+function toggleLiveMode(checkbox) {
+    const liveIndicator = document.getElementById('liveIndicator');
+    if (checkbox.checked) {
+        liveIndicator.style.background = '#ff4444';
+        video.style.filter = FILTERS[activeFilter];
+    } else {
+        liveIndicator.style.background = '#ccc';
+        video.style.filter = 'none';
+    }
 }

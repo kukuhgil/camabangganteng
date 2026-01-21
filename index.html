@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zahra's Photobooth</title>
-
     <link rel="stylesheet" href="css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Quicksand:wght@300;500&display=swap"
         rel="stylesheet">
@@ -27,26 +26,26 @@
         <h1>Zahra's Photobooth</h1>
         <p class="subtitle">Pure moments, captured.</p>
         <button class="start-btn" onclick="showScreen('tutorialScreen')">START</button>
-        <p class="version">Beta v0.3</p>
+        <p class="version">Beta v0.4</p>
         <p class="credit">Build and design by <br>Kukuh G</p>
     </section>
 
     <section id="tutorialScreen" class="screen">
         <div class="tutorial-wrapper">
             <h2>TUTORIAL</h2>
-
             <div class="tutorial-grid">
                 <div class="tutorial-card">
                     <div class="card-img">1</div>
-                    <p>Pilih durasi & jumlah foto kamu</p>
+                    <p>Pilih durasi & jumlah foto kamu sekalian persiapkan diri atau ornamen yang diperlukan</p>
                 </div>
                 <div class="tutorial-card">
                     <div class="card-img">2</div>
-                    <p>Teken Tombol bulet putih untuk mulai sesi foto</p>
+                    <p>Teken Tombol bulet putih untuk mulai sesi foto atau kamu bisa upload foto sendiri</p>
                 </div>
                 <div class="tutorial-card">
                     <div class="card-img">3</div>
-                    <p>jika dirasa foto udah cocok tekan next lagi</p>
+                    <p>Kamu bisa pilih filter juga sebelum mulai sesi foto. Jika dirasa foto udah cocok tekan next lagi
+                    </p>
                 </div>
                 <div class="tutorial-card">
                     <div class="card-img">4</div>
@@ -104,7 +103,6 @@
                             </div>
                             <span>1 Photo</span>
                         </div>
-
                         <div class="selection-card" onclick="updateSelection('count', 2, this)">
                             <div class="strip-mini">
                                 <div class="grid-area p2"><span></span><span></span></div>
@@ -112,7 +110,6 @@
                             </div>
                             <span>2 Photos</span>
                         </div>
-
                         <div class="selection-card" onclick="updateSelection('count', 3, this)">
                             <div class="strip-mini">
                                 <div class="grid-area p3"><span></span><span></span><span></span></div>
@@ -120,7 +117,6 @@
                             </div>
                             <span>3 Photos</span>
                         </div>
-
                         <div class="selection-card" onclick="updateSelection('count', 4, this)">
                             <div class="strip-mini">
                                 <div class="grid-area p4">
@@ -131,7 +127,6 @@
                             </div>
                             <span>4 Photos</span>
                         </div>
-
                         <div class="selection-card" onclick="updateSelection('count', 6, this)">
                             <div class="strip-mini">
                                 <div class="grid-area p6">
@@ -151,26 +146,78 @@
 
     <section id="boothScreen" class="screen">
         <div class="booth-wrap">
-            <div class="booth landscape">
-                <div class="camera-controls-top">
-                    <select id="cameraSelect" class="camera-dropdown-mini">
-                        <option value="">Detecting Cameras...</option>
-                    </select>
+            <div class="control-group-container">
+                <div class="control-group">
+                    <label class="section-label">PHOTO SOURCE</label>
+                    <div class="upload-box-wrapper">
+                        <input type="file" id="manualUpload" hidden accept="image/*">
+                        <button class="booth-action-btn" onclick="document.getElementById('manualUpload').click()">
+                            <i data-feather="upload"></i> Upload Foto
+                        </button>
+                    </div>
+
+                    <label class="section-label">CAMERA SETTINGS</label>
+                    <button id="mirrorBtn" class="booth-action-btn" title="Mirror Camera">
+                        <i data-feather="repeat"></i> Mirror Mode
+                    </button>
+
+                    <button id="resetPhotosBtn" class="booth-action-btn reset-danger" onclick="clearCurrentShots()"
+                        title="Hapus semua foto">
+                        <i data-feather="trash-2"></i> Reset Photos
+                    </button>
                 </div>
-                <div id="countdown"></div>
-                <div id="flash"></div>
-                <video id="video" autoplay playsinline></video>
-                <canvas id="canvas"></canvas>
-                <button id="shutterBtn"></button>
-                <button id="mirrorBtn" title="Mirror Camera">⟲</button>
-            </div>
-            <div class="preview-area">
-                <span class="span-tek ">Klik foto untuk retake ulang foto
-                </span>
-                <div id="previewStrip" class="preview-strip">
+
+                <div class="live-toggle-wrapper">
+                    <div class="live-info">
+                        <span id="liveIndicator"></span>
+                        <span class="live-text">LIVE MODE (Tanpa Filter)<span style="color: red;">*</span></span>
+                    </div>
+                    <label class="switch-mini">
+                        <input type="checkbox" id="liveToggle" checked onchange="toggleLiveMode(this)">
+                        <span class="slider-mini"></span>
+                    </label>
                 </div>
             </div>
 
+            <div class="booth-center-area">
+                <div class="booth landscape">
+                    <div class="camera-controls-top">
+                        <select id="cameraSelect" class="camera-dropdown-mini">
+                            <option value="">Detecting Cameras...</option>
+                        </select>
+                    </div>
+                    <div id="countdown"></div>
+                    <div id="flash"></div>
+                    <video id="video" autoplay playsinline></video>
+                    <canvas id="canvas" style="display:none;"></canvas>
+                    <button id="shutterBtn"></button>
+                </div>
+
+                <div class="filter-horizontal-container">
+                    <div class="filter-header"
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <label class="section-label" style="margin: 0;">LIVE EFFECTS <span class="section-text">(Pilih hanya satu filter)</span><span style="color: red;">*</span></label>
+                    </div>
+
+                    <div id="filterContent" class="filter-nav-wrapper">
+                        <button class="nav-scroll-btn left" onclick="scrollFilter('left')">
+                            <i data-feather="chevron-left"></i>
+                        </button>
+
+                        <div class="filter-scroll-wrapper" id="boothFilterList">
+                        </div>
+
+                        <button class="nav-scroll-btn right" onclick="scrollFilter('right')">
+                            <i data-feather="chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-area">
+                <span class="span-tek">Klik foto untuk retake ulang foto</span>
+                <div id="previewStrip" class="preview-strip"></div>
+            </div>
         </div>
     </section>
 
@@ -179,7 +226,8 @@
             <div class="result-left">
                 <div class="result-header">
                     <h2>Here's Result</h2>
-                </div> <canvas id="collage"></canvas>
+                </div>
+                <canvas id="collage"></canvas>
                 <p>Thanks udah nyoba foto di <br> <span class="wm-text">Zahrafoto</span> <br>tungguin update berikutnya
                     yaww!!</p>
             </div>
@@ -188,26 +236,6 @@
                 <h3>Customization</h3>
                 <div class="editor-step active" id="step1">
                     <div class="editor-group">
-                        <label>Filter</label>
-                        <select id="filterEditor" onchange="updateLiveSettings()">
-                            <option value="normal">Normal</option>
-                            <option value="bw">B&W</option>
-                            <option value="vintage">Vintage</option>
-                            <option value="soft">Soft</option>
-                            <option value="country">Country</option>
-                            <option value="dv">Digital Video</option>
-                            <option value="instax">Instax</option>
-                            <option value="nordic">Nordic Blue</option>
-                            <option value="midnight">Midnight</option>
-                            <option value="cyber">Cyberpunk</option>
-                            <option value="faded">Faded</option>
-                            <option value="candy">Candy</option>
-                            <option value="noir">Deep Noir</option>
-                            <option value="golden">Golden Hour</option>
-                            <option value="ocean">Oceanic</option>
-                            <option value="retro">Retro Pop</option>
-                            <option value="bloom">Bloom Glow</option>
-                        </select>
                         <label>Warna Frame</label>
                         <input type="color" id="frameColorEditor" value="#ffffff" oninput="updateLiveSettings()">
                         <label style="display: flex; align-items: center; gap: 8px;">
@@ -215,10 +243,10 @@
                             Warna Border Frame
                         </label>
                         <input type="color" id="storeColorEditor" oninput="updateLiveSettings()" style="display: none;">
-
                         <label>Upload Background</label>
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <input type="file" id="bgUploadEditor" accept="image/*" onchange="updateLiveSettings()">
+                            <input type="file" id="bgUploadEditor" accept="image/*"
+                                onchange="handleBackgroundUpload(this)" onclick="this.value=null">
                             <button id="removeUploadBtn" class="delete-btn-bg"
                                 onclick="removeSpecificBg('upload')">×</button>
                         </div>
@@ -247,7 +275,7 @@
                             <option value="custom">Custom Date</option>
                             <option value="off">Off</option>
                         </select>
-                        <input type="date" id="customDateEditor" style="display:none" oninput="updateLiveSettings()">
+                        <input type="date" id="customDateEditor" style="display:none" onchange="updateLiveSettings()">
                     </div>
                 </div>
 
@@ -274,7 +302,7 @@
                 </div>
 
                 <div class="support-text">
-                    <span>Support me:</span>
+                    <span>Buy a Coffe:</span>
                     <a href="https://saweria.co/kukuhg" target="_blank">saweria.co/kukuhg</a>
                 </div>
             </div>
@@ -283,7 +311,9 @@
                 <button id="download">Download</button>
                 <button id="reset" onclick="resetBooth()">Take Again</button>
             </div>
+        </div>
     </section>
+
     <div id="mainNavigation" class="global-nav" style="display: none;">
         <button id="prevBtn" class="nav-btn" onclick="goBack()">PREVIOUS</button>
         <button id="globalNext" class="nav-btn" onclick="goNext()">NEXT</button>
